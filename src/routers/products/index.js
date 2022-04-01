@@ -1,7 +1,15 @@
 const router = require("express").Router();
 
-const getProductsRouter = require("./getProductsController");
+const {
+  getAllProductRouter,
+  getProductsByCategoryRouter,
+  getProductsByNameRouter,
+  getCategoriesRouter,
+} = require("./getProductsController");
 
-router.use(getProductsRouter);
+router.use(getAllProductRouter);
+router.use(getProductsByNameRouter);
+router.use(getCategoriesRouter);
+router.use(getProductsByCategoryRouter);
 
 module.exports = router;
