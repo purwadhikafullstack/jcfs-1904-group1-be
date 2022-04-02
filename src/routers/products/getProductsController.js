@@ -40,7 +40,7 @@ const getProductsByCategoryRouter = router.get(
     try {
       const connection = await pool.promise().getConnection();
 
-      const sqlGetProductsByCategory = `SELECT products.id, products.name, categories.name AS category, products.price, products.productPhoto, products.dose
+      const sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose
     FROM ((products_categories
     INNER JOIN products ON products_categories.product_id = products.id)
     INNER JOIN categories ON products_categories.category_id  = categories.id)
@@ -60,6 +60,28 @@ const getProductsByCategoryRouter = router.get(
     }
   }
 );
+
+//Get Product By Id
+const getProductsByIdRouter = router.get("/:id", async (req, res, next) => {
+  try {
+    const connection = await pool.promise().getConnection();
+
+    const sqlGetProductsByCategory = `SELECT * FROM (((products_categories
+      INNER JOIN products ON products_categories.product_id = products.id)
+      INNER JOIN categories ON products_categories.category_id  = categories.id)
+      INNER JOIN stocks ON products_categories.product_id = stocks.product_id)
+      WHERE products.id = ?;`;
+
+    const dataId = req.params.id;
+
+    const result = await connection.query(sqlGetProductsByCategory, dataId);
+    connection.release();
+
+    res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+});
 
 //Get Products by Name
 const getProductsByNameRouter = router.get(
@@ -87,4 +109,5 @@ module.exports = {
   getProductsByCategoryRouter,
   getProductsByNameRouter,
   getCategoriesRouter,
+  getProductsByIdRouter,
 };
