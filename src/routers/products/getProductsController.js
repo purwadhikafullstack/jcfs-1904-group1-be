@@ -22,7 +22,9 @@ const getCategoriesRouter = router.get(
 const getAllProductRouter = router.get("/", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
-    const sqlGetProducts = "SELECT * FROM products;";
+    const sqlGetProducts = `SELECT *, p.id FROM products p
+    INNER JOIN products_categories pc ON p.id = pc.product_id
+    INNER JOIN categories c ON pc.category_id = c.id;`;
     const result = await connection.query(sqlGetProducts);
 
     connection.release();
@@ -62,26 +64,40 @@ const getProductsByCategoryRouter = router.get(
 );
 
 //Get Product By Id
-const getProductsByIdRouter = router.get("/:id", async (req, res, next) => {
-  try {
-    const connection = await pool.promise().getConnection();
+const getProductsByIdRouter = router.get(
+  "/:category/:id",
+  async (req, res, next) => {
+    try {
+      const connection = await pool.promise().getConnection();
 
-    const sqlGetProductsByCategory = `SELECT * FROM (((products_categories
-      INNER JOIN products ON products_categories.product_id = products.id)
+      const sqlGetProductsByCategory = `SELECT *, products.id FROM (((products
+      INNER JOIN products_categories ON products_categories.product_id = products.id)
       INNER JOIN categories ON products_categories.category_id  = categories.id)
       INNER JOIN stocks ON products_categories.product_id = stocks.product_id)
       WHERE products.id = ?;`;
+      const dataId = req.params.id;
+      const result = await connection.query(sqlGetProductsByCategory, dataId);
 
-    const dataId = req.params.id;
+      const sqlGetSimilarProducts = `SELECT p.id, productName, price, productPhoto, dose, name, SUM(boxSold + stripSold + pcsSold + mgSold) AS totalSold
+    FROM products p
+    INNER JOIN products_categories pc ON p.id = pc.product_id
+    INNER JOIN categories c ON pc.category_id = c.id
+    INNER JOIN stocks s ON s.product_id = p.id
+    WHERE c.name = ?
+    GROUP BY p.id ORDER BY totalSold DESC LIMIT 5;`;
+      const dataSimilarProducts = req.params.category;
+      const resultSimilar = await connection.query(
+        sqlGetSimilarProducts,
+        dataSimilarProducts
+      );
+      connection.release();
 
-    const result = await connection.query(sqlGetProductsByCategory, dataId);
-    connection.release();
-
-    res.status(200).send(result);
-  } catch (error) {
-    next(error);
+      res.status(200).send({ result, resultSimilar });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 //Get Products by Name
 const getProductsByNameRouter = router.get(
