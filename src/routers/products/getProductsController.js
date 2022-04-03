@@ -18,18 +18,28 @@ const getCategoriesRouter = router.get(
     }
   }
 );
-//Get All Products
+//Get Products
 const getAllProductRouter = router.get("/", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
+    const sqlGetSortedProducts = `SELECT *, p.id FROM products p
+    INNER JOIN products_categories pc ON p.id = pc.product_id
+    INNER JOIN categories c ON pc.category_id = c.id
+    ORDER BY p.${req.query.sortBy} ${req.query.order};`;
+
     const sqlGetProducts = `SELECT *, p.id FROM products p
     INNER JOIN products_categories pc ON p.id = pc.product_id
     INNER JOIN categories c ON pc.category_id = c.id;`;
-    const result = await connection.query(sqlGetProducts);
 
-    connection.release();
-
-    res.status(200).send(result);
+    if (req.query.sortBy && req.query.order) {
+      const result = await connection.query(sqlGetSortedProducts);
+      connection.release();
+      res.status(200).send(result);
+    } else {
+      const result = await connection.query(sqlGetProducts);
+      connection.release();
+      res.status(200).send(result);
+    }
   } catch (error) {
     next(error);
   }
@@ -41,22 +51,35 @@ const getProductsByCategoryRouter = router.get(
   async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
-
-      const sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose
+      const sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name
+      FROM ((products_categories
+      INNER JOIN products ON products_categories.product_id = products.id)
+      INNER JOIN categories ON products_categories.category_id  = categories.id)
+      WHERE categories.name = ?;`;
+      const sqlGetSortedProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name
     FROM ((products_categories
     INNER JOIN products ON products_categories.product_id = products.id)
     INNER JOIN categories ON products_categories.category_id  = categories.id)
-    WHERE categories.name = ?;`;
+    WHERE categories.name = ?
+    ORDER BY products.${req.query.sortBy} ${req.query.order};`;
 
       const dataCategory = req.params.category;
 
-      const result = await connection.query(
-        sqlGetProductsByCategory,
-        dataCategory
-      );
-      connection.release();
-
-      res.status(200).send(result);
+      if (req.query.sortBy && req.query.order) {
+        const result = await connection.query(
+          sqlGetSortedProductsByCategory,
+          dataCategory
+        );
+        connection.release();
+        res.status(200).send(result);
+      } else {
+        const result = await connection.query(
+          sqlGetProductsByCategory,
+          dataCategory
+        );
+        connection.release();
+        res.status(200).send(result);
+      }
     } catch (error) {
       next(error);
     }
@@ -106,11 +129,11 @@ const getProductsByNameRouter = router.get(
     try {
       const connection = await pool.promise().getConnection();
       const data = req.query.search;
-      const sqlGetProducts = `SELECT * FROM products WHERE name LIKE ?;`;
-      const sqlGetProductsByName = "%" + data + "%";
+      const sqlGetProductsByName = `SELECT * FROM products WHERE productName LIKE ?;`;
+      const dataGetProducts = "%" + data + "%";
       const result = await connection.query(
-        sqlGetProducts,
-        sqlGetProductsByName
+        sqlGetProductsByName,
+        dataGetProducts
       );
       connection.release();
       res.status(200).send(result);
