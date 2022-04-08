@@ -22,24 +22,17 @@ const getCategoriesRouter = router.get(
 const getAllProductRouter = router.get("/", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
-    const sqlGetSortedProducts = `SELECT *, p.id FROM products p
-    INNER JOIN products_categories pc ON p.id = pc.product_id
-    INNER JOIN categories c ON pc.category_id = c.id
-    ORDER BY p.${req.query.sortBy} ${req.query.order};`;
 
-    const sqlGetProducts = `SELECT *, p.id FROM products p
+    let sqlGetProducts = `SELECT *, p.id FROM products p
     INNER JOIN products_categories pc ON p.id = pc.product_id
-    INNER JOIN categories c ON pc.category_id = c.id;`;
+    INNER JOIN categories c ON pc.category_id = c.id`;
 
     if (req.query.sortBy && req.query.order) {
-      const result = await connection.query(sqlGetSortedProducts);
-      connection.release();
-      res.status(200).send(result);
-    } else {
-      const result = await connection.query(sqlGetProducts);
-      connection.release();
-      res.status(200).send(result);
+      sqlGetProducts += ` ORDER BY p.${req.query.sortBy} ${req.query.order};`;
     }
+    const result = await connection.query(sqlGetProducts);
+    connection.release();
+    res.status(200).send(result);
   } catch (error) {
     next(error);
   }
