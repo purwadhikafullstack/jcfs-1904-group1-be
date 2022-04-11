@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
-  res.status(200).send("API IS RUNNING");
+  res.status(200).send("API 1-Pharmacy");
 });
 app.use("/products", productsRouter);
 
