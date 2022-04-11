@@ -1,23 +1,6 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 
-//Get Categories
-const getCategoriesRouter = router.get(
-  "/categories",
-  async (req, res, next) => {
-    try {
-      const connection = await pool.promise().getConnection();
-
-      const sqlGetCategories = "SELECT name, id FROM categories";
-      const result = await connection.query(sqlGetCategories);
-      connection.release();
-
-      res.status(200).send(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-);
 //Get Products
 const getAllProductRouter = router.get("/", async (req, res, next) => {
   try {
@@ -33,10 +16,10 @@ const getAllProductRouter = router.get("/", async (req, res, next) => {
     if (req.query.sortBy && req.query.order) {
       sqlGetProducts += ` ORDER BY p.${req.query.sortBy} ${req.query.order};`;
     }
-    const result = await connection.query(sqlGetProducts);
-    const resultTotal = await connection.query(getTotalProducts);
+    const [result] = await connection.query(sqlGetProducts);
+    const [resultTotal] = await connection.query(getTotalProducts);
     connection.release();
-    res.status(200).send({ result, resultTotal });
+    res.status(200).send({ result, total: resultTotal[0].total });
   } catch (error) {
     next(error);
   }
@@ -52,7 +35,7 @@ const getProductsByCategoryRouter = router.get(
       FROM ((products_categories
       INNER JOIN products ON products_categories.product_id = products.id)
       INNER JOIN categories ON products_categories.category_id  = categories.id)
-      WHERE categories.name = ?;`;
+      WHERE categories.name = ?`;
       const getTotalProducts = `SELECT COUNT(products.id) AS total
       FROM ((products_categories
       INNER JOIN products ON products_categories.product_id = products.id)
@@ -63,17 +46,18 @@ const getProductsByCategoryRouter = router.get(
       if (req.query.sortBy && req.query.order) {
         sqlGetProductsByCategory += ` ORDER BY products.${req.query.sortBy} ${req.query.order};`;
       }
-      const result = await connection.query(
+      const [result] = await connection.query(
         sqlGetProductsByCategory,
         dataCategory
       );
-      const resultTotal = await connection.query(
+      const [resultTotal] = await connection.query(
         getTotalProducts,
         dataCategory
       );
       connection.release();
-      res.status(200).send({ result, resultTotal });
+      res.status(200).send({ result, total: resultTotal[0].total });
     } catch (error) {
+      s;
       next(error);
     }
   }
@@ -107,7 +91,6 @@ const getProductsByIdRouter = router.get(
         dataSimilarProducts
       );
       connection.release();
-
       res.status(200).send({ result, resultSimilar });
     } catch (error) {
       next(error);
@@ -140,6 +123,5 @@ module.exports = {
   getAllProductRouter,
   getProductsByCategoryRouter,
   getProductsByNameRouter,
-  getCategoriesRouter,
   getProductsByIdRouter,
 };
