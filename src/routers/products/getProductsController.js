@@ -25,14 +25,18 @@ const getAllProductRouter = router.get("/", async (req, res, next) => {
 
     let sqlGetProducts = `SELECT *, p.id FROM products p
     INNER JOIN products_categories pc ON p.id = pc.product_id
-    INNER JOIN categories c ON pc.category_id = c.id`;
+    INNER JOIN categories c ON pc.category_id = c.id
+    LIMIT 10 OFFSET ${req.query.offSet}`;
+
+    const getTotalProducts = `SELECT COUNT(id) AS total FROM products`;
 
     if (req.query.sortBy && req.query.order) {
       sqlGetProducts += ` ORDER BY p.${req.query.sortBy} ${req.query.order};`;
     }
     const result = await connection.query(sqlGetProducts);
+    const resultTotal = await connection.query(getTotalProducts);
     connection.release();
-    res.status(200).send(result);
+    res.status(200).send({ result, resultTotal });
   } catch (error) {
     next(error);
   }
@@ -44,35 +48,31 @@ const getProductsByCategoryRouter = router.get(
   async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
-      const sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name
+      let sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name
       FROM ((products_categories
       INNER JOIN products ON products_categories.product_id = products.id)
       INNER JOIN categories ON products_categories.category_id  = categories.id)
       WHERE categories.name = ?;`;
-      const sqlGetSortedProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name
-    FROM ((products_categories
-    INNER JOIN products ON products_categories.product_id = products.id)
-    INNER JOIN categories ON products_categories.category_id  = categories.id)
-    WHERE categories.name = ?
-    ORDER BY products.${req.query.sortBy} ${req.query.order};`;
-
+      const getTotalProducts = `SELECT COUNT(products.id) AS total
+      FROM ((products_categories
+      INNER JOIN products ON products_categories.product_id = products.id)
+      INNER JOIN categories ON products_categories.category_id  = categories.id)
+      WHERE categories.name = ?;`;
       const dataCategory = req.params.category;
 
       if (req.query.sortBy && req.query.order) {
-        const result = await connection.query(
-          sqlGetSortedProductsByCategory,
-          dataCategory
-        );
-        connection.release();
-        res.status(200).send(result);
-      } else {
-        const result = await connection.query(
-          sqlGetProductsByCategory,
-          dataCategory
-        );
-        connection.release();
-        res.status(200).send(result);
+        sqlGetProductsByCategory += ` ORDER BY products.${req.query.sortBy} ${req.query.order};`;
       }
+      const result = await connection.query(
+        sqlGetProductsByCategory,
+        dataCategory
+      );
+      const resultTotal = await connection.query(
+        getTotalProducts,
+        dataCategory
+      );
+      connection.release();
+      res.status(200).send({ result, resultTotal });
     } catch (error) {
       next(error);
     }
