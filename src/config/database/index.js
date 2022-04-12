@@ -22,4 +22,4 @@ mysql2.getConnection((err, conn) => {
   conn.release();
 });
 
-module.exports = mysql2;
+module.exports = { mysql2 };
