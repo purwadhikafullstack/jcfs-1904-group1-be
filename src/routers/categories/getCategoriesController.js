@@ -7,7 +7,7 @@ router.get("/", async (req, res, next) => {
     const connection = await pool.promise().getConnection();
 
     const sqlGetCategories = "SELECT name, id FROM categories";
-    const result = await connection.query(sqlGetCategories);
+    const [result] = await connection.query(sqlGetCategories);
     connection.release();
 
     res.status(200).send(result);

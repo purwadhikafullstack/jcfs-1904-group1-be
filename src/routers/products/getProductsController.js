@@ -57,7 +57,6 @@ const getProductsByCategoryRouter = router.get(
       connection.release();
       res.status(200).send({ result, total: resultTotal[0].total });
     } catch (error) {
-      s;
       next(error);
     }
   }
