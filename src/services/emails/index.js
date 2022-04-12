@@ -6,9 +6,9 @@ const courier = nodemailer.createTransport({
   auth: {
     type: "OAuth2",
     user: "axaladyx@gmail.com",
-    clientId: process.env.G_CLIENT_ID,
-    clientSecret: process.env.G_CLIENT_SECRET,
-    refreshToken: process.env.G_REFRESH_TOKEN,
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    refreshToken: process.env.REFRESH_TOKEN,
   },
 });
 
@@ -18,7 +18,7 @@ const sendVerificationEmail = async ({ recipient, subject, username, url }) => {
       from: "Account Verification <axaladyx@gmail.com> ",
       to: recipient,
       subject,
-      html: `<h2>Hi ${username}, Thanks for registering. please click the link to verify your account</h2>
+      html: `<h2>Hi ${username}, Thanks for registering. please click the link below to verify your account</h2>
         <a href=${url}> Click Here </a>
       `,
     };

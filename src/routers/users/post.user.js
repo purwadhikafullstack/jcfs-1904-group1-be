@@ -6,8 +6,6 @@ const bcrypt = require("bcryptjs");
 const { sign } = require("../../services/token");
 const { sendVerificationEmail } = require("../../services/emails");
 
-//Create user
-
 const postUserRouter = async (req, res, next) => {
   try {
     const sql = "INSERT INTO users SET ?";
@@ -53,24 +51,25 @@ const postLoginUser = async (req, res, next) => {
   try {
     const connection = await mysql2.promise().getConnection();
     await connection.beginTransaction();
+    const { username, password } = req.body;
 
-    try {
-      const connection = await mysql2.promise().getConnection();
-      const { username, password } = req.body;
+    const sqlLoginUser =
+      "SELECT id, username, fullName, email, password, isAdmin, isVerified, age, gender, address FROM users WHERE username = ?;";
+    const sqlDataUSer = username;
 
-      const sqlLoginUser =
-        "SELECT id, username, password, isAdmin FROM users WHERE username = ?;";
-      const sqlDataUSer = username;
+    const result = await connection.query(sqlLoginUser, sqlDataUSer);
+    connection.release();
 
-      const result = await connection.query(sqlLoginUser, sqlDataUSer);
-      connection.release();
+    const user = result[0];
 
-      const user = result[0];
+    console.log(user);
 
-      res.status(200).send({ user });
-    } catch (error) {
-      next(error);
-    }
+    res.status(200).send({ user });
+    // if (user.isVerified === 1) {
+    //   return res.status(200).send({ user });
+    // } else {
+    //   return res.status(401).send({ message: "Please verify your account" });
+    // }
   } catch (error) {
     next(error);
   }
