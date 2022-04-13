@@ -21,7 +21,7 @@ jobs:
           password: ${{secrets.SSH_PASSWORD}}
           port: 22
           script: |
-            cd ~/app/jcfs-1904-group1-be
+            cd ~/app/1-pharmacy-api
             git pull origin master
             npm install
             pm2 restart api-1-pharmacy
