@@ -15,7 +15,7 @@ app.use("/users", userRouter);
 app.use("/products", productsRouter);
 
 app.get("/", (req, res) => {
-  res.status(200).send("API 1-Pharmacy");
+  res.status(200).send("API 1-Pharmacy 😎");
 });
 
 app.use((error, req, res, next) => {
