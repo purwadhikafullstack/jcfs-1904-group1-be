@@ -24,4 +24,4 @@ jobs:
             cd ~/app/1-pharmacy-api
             git pull origin master
             npm install
-            pm2 restart -1-pharmacy
+            pm2 restart 1-pharmacy
