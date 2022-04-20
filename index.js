@@ -10,6 +10,7 @@ const bodyParser = require("body-parser");
 
 const productsRouter = require("./src/routers/products");
 const categoriesRouter = require("./src/routers/categories");
+const transactionsRouter = require("./src/routers/transactions");
 
 app.use(cors());
 app.use(express.json());
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 
 app.use("/products", productsRouter);
 app.use("/categories", categoriesRouter);
+app.use("/transactions", transactionsRouter);
 
 app.use((error, req, res, next) => {
   res.status(500).send({

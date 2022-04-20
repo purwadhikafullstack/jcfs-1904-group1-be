@@ -10,18 +10,17 @@ const getAllProductRouter = router.get("/", async (req, res, next) => {
     INNER JOIN products_categories pc ON p.id = pc.product_id
     INNER JOIN categories c ON pc.category_id = c.id
     INNER JOIN stocks s ON pc.product_id = s.product_id
-    LIMIT ${req.query.limit} OFFSET ${req.query.offSet}`;
+    WHERE p.isDeleted = 0`;
 
-    const getTotalProducts = `SELECT COUNT(id) AS total FROM products`;
+    const getTotalProducts = `SELECT COUNT(id) AS total FROM products WHERE isDeleted = 0`;
 
     if (req.query.sortBy && req.query.order) {
-      sqlGetProducts = `SELECT *, p.id FROM products p
-      INNER JOIN products_categories pc ON p.id = pc.product_id
-      INNER JOIN categories c ON pc.category_id = c.id
-      INNER JOIN stocks s ON pc.product_id = s.product_id
-      ORDER BY p.${req.query.sortBy} ${req.query.order}
+      sqlGetProducts += ` ORDER BY p.${req.query.sortBy} ${req.query.order}
       LIMIT ${req.query.limit} OFFSET ${req.query.offSet};`;
+    } else {
+      sqlGetProducts += ` LIMIT ${req.query.limit} OFFSET ${req.query.offSet};`;
     }
+
     const [result] = await connection.query(sqlGetProducts);
     const [resultTotal] = await connection.query(getTotalProducts);
     connection.release();
@@ -42,7 +41,7 @@ const getProductsByCategoryRouter = router.get(
       INNER JOIN products ON products_categories.product_id = products.id)
       INNER JOIN categories ON products_categories.category_id  = categories.id)
       INNER JOIN stocks ON products_categories.product_id = stocks.product_id)
-      WHERE categories.name = ?
+      WHERE categories.name = ? AND products.isDeleted = 0
       LIMIT ${req.query.limit} OFFSET ${req.query.offSet}`;
 
       const getTotalProducts = `SELECT COUNT(products.id) AS total
@@ -58,7 +57,7 @@ const getProductsByCategoryRouter = router.get(
         INNER JOIN products ON products_categories.product_id = products.id)
         INNER JOIN categories ON products_categories.category_id  = categories.id)
         INNER JOIN stocks ON products_categories.product_id = stocks.product_id)
-        WHERE categories.name = ?
+        WHERE categories.name = ? AND products.isDeleted = 0
         ORDER BY products.${req.query.sortBy} ${req.query.order}
         LIMIT ${req.query.limit} OFFSET ${req.query.offSet};`;
       }
@@ -120,7 +119,7 @@ const getProductsByNameRouter = router.get(
     try {
       const connection = await pool.promise().getConnection();
       const data = req.query.search;
-      const sqlGetProductsByName = `SELECT * FROM products WHERE productName LIKE ?;`;
+      const sqlGetProductsByName = `SELECT * FROM products WHERE productName LIKE ? AND isDeleted = 0;`;
       const dataGetProducts = "%" + data + "%";
       const result = await connection.query(
         sqlGetProductsByName,
