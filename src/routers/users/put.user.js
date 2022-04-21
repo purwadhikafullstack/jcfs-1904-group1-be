@@ -9,6 +9,10 @@ const { sendVerificationEmail } = require("../../services/emails");
 const putUserRouter = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
+<<<<<<< HEAD
+=======
+    // await connection.beginTransaction();
+>>>>>>> 2cc3f571b4b62c8eaf94e01c040152a2771fbf45
     const sqlUpdateUser = "UPDATE users SET ? WHERE id = ?;";
 
     const dataUpdateUser = [req.body, req.params.userId];
@@ -22,6 +26,7 @@ const putUserRouter = async (req, res, next) => {
   }
 };
 
+<<<<<<< HEAD
 const putResetPassword = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
@@ -43,5 +48,8 @@ const putResetPassword = async (req, res, next) => {
 
 router.put("/:userId", putUserRouter);
 router.put("/reset-password", putResetPassword);
+=======
+router.put("/:userId", putUserRouter);
+>>>>>>> 2cc3f571b4b62c8eaf94e01c040152a2771fbf45
 
 module.exports = router;

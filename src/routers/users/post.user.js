@@ -4,12 +4,17 @@ const router = require("express").Router();
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const { sign } = require("../../services/token");
+<<<<<<< HEAD
 const {
   sendVerificationEmail,
   sendResetPasswordEmail,
 } = require("../../services/emails");
 
 // user register
+=======
+const { sendVerificationEmail } = require("../../services/emails");
+
+>>>>>>> 2cc3f571b4b62c8eaf94e01c040152a2771fbf45
 const postUserRouter = async (req, res, next) => {
   try {
     const sql = "INSERT INTO users SET ?";
@@ -37,9 +42,17 @@ const postUserRouter = async (req, res, next) => {
       recipient: data.email,
       subject: "Email Verification",
       username: data.username,
+<<<<<<< HEAD
       url: `${process.env.API_URL}/users/verify?token=${token}`,
       data: {
         username: data.username,
+=======
+      // url: `http://localhost:${process.env.API_PORT}/users/verify?token=${token}`,
+      url: `${process.env.API_URL}/users/verify?token=${token}`,
+      data: {
+        username: data.username,
+        // url: `http://localhost:${process.env.API_PORT}/users/verify?token=${token}`,
+>>>>>>> 2cc3f571b4b62c8eaf94e01c040152a2771fbf45
         url: `${process.env.API_URL}/users/verify?token=${token}`,
       },
     });
@@ -48,7 +61,11 @@ const postUserRouter = async (req, res, next) => {
   }
 };
 
+<<<<<<< HEAD
 // user login
+=======
+//Login
+>>>>>>> 2cc3f571b4b62c8eaf94e01c040152a2771fbf45
 const postLoginUser = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
@@ -64,12 +81,15 @@ const postLoginUser = async (req, res, next) => {
 
     const user = result[0];
 
+<<<<<<< HEAD
     const compareResult = bcrypt.compareSync(password, user[0].password);
 
     if (!compareResult) {
       return res.status(401).send({ message: "Log in cridentials invalid" });
     }
 
+=======
+>>>>>>> 2cc3f571b4b62c8eaf94e01c040152a2771fbf45
     res.status(200).send({ user });
     // if (user.isVerified === 1) {
     //   return res.status(200).send({ user });
@@ -81,6 +101,7 @@ const postLoginUser = async (req, res, next) => {
   }
 };
 
+<<<<<<< HEAD
 // forgot password
 const postForgotPassword = async (req, res, next) => {
   try {
@@ -110,5 +131,9 @@ const postForgotPassword = async (req, res, next) => {
 router.post("/", postUserRouter);
 router.post("/login", postLoginUser);
 router.post("/forgot-password", postForgotPassword);
+=======
+router.post("/", postUserRouter);
+router.post("/login", postLoginUser);
+>>>>>>> 2cc3f571b4b62c8eaf94e01c040152a2771fbf45
 
 module.exports = router;
