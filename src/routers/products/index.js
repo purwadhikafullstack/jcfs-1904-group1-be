@@ -4,6 +4,7 @@ const {
   getAllProductRouter,
   getProductsByCategoryRouter,
   getProductsByNameRouter,
+  getCategoriesRouter,
   getProductsByIdRouter,
 } = require("./getProductsController");
 
@@ -18,6 +19,7 @@ router.use(getAllProductRouter);
 router.use(getProductsByNameRouter);
 router.use(getProductsByCategoryRouter);
 router.use(getProductsByIdRouter);
+router.use(getCategoriesRouter);
 
 router.use(postUploadproductPhotoRouter);
 

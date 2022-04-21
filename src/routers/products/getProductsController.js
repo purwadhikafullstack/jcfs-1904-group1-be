@@ -1,6 +1,23 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 
+//Get Categories
+const getCategoriesRouter = router.get(
+  "/categories",
+  async (req, res, next) => {
+    try {
+      const connection = await pool.promise().getConnection();
+
+      const sqlGetCategories = "SELECT name, id FROM categories";
+      const result = await connection.query(sqlGetCategories);
+      connection.release();
+
+      res.status(200).send(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 //Get Products
 const getAllProductRouter = router.get("/", async (req, res, next) => {
   try {
@@ -137,5 +154,6 @@ module.exports = {
   getAllProductRouter,
   getProductsByCategoryRouter,
   getProductsByNameRouter,
+  getCategoriesRouter,
   getProductsByIdRouter,
 };
