@@ -8,10 +8,21 @@ const {
   getProductsByIdRouter,
 } = require("./getProductsController");
 
+const {
+  postUploadproductPhotoRouter,
+  // postInputProductsRouter,
+} = require("./postProductsController");
+
+const { putProductsRouter } = require("./putProductsController");
+
 router.use(getAllProductRouter);
 router.use(getProductsByNameRouter);
-router.use(getCategoriesRouter);
 router.use(getProductsByCategoryRouter);
 router.use(getProductsByIdRouter);
+router.use(getCategoriesRouter);
+
+router.use(postUploadproductPhotoRouter);
+
+router.use(putProductsRouter);
 
 module.exports = router;
