@@ -26,9 +26,11 @@ const putResetPassword = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
-    const sql = "UPDATE users SET password WHERE id = ?;";
+    const sql = "UPDATE users SET ? WHERE id = ?;";
+    const verifiedToken = verify(req.body.token);
+    console.log(verifiedToken);
 
-    const sqlNewPassword = [req.body, req.params.userId];
+    const sqlNewPassword = [req.body.password, verifiedToken];
     console.log(req.body.password);
     sqlNewPassword[0].password = bcrypt.hashSync(sqlNewPassword[0].password);
 
