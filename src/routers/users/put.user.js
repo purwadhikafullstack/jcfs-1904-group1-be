@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { mysql2 } = require("../../config/database");
+const pool = require("../../config/database");
 const router = require("express").Router();
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
@@ -8,7 +8,7 @@ const { sendVerificationEmail } = require("../../services/emails");
 
 const putUserRouter = async (req, res, next) => {
   try {
-    const connection = await mysql2.promise().getConnection();
+    const connection = await pool.promise().getConnection();
     // await connection.beginTransaction();
     const sqlUpdateUser = "UPDATE users SET ? WHERE id = ?;";
 

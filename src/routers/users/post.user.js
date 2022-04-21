@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { mysql2 } = require("../../config/database");
+const pool = require("../../config/database");
 const router = require("express").Router();
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
@@ -18,7 +18,7 @@ const postUserRouter = async (req, res, next) => {
     data.password = bcrypt.hashSync(data.password);
 
     // bikin koneksi
-    const connection = await mysql2.promise().getConnection();
+    const connection = await pool.promise().getConnection();
     // simpan data baru, akan me return id nya
     const [result] = await connection.query(sql, data);
     // membuat token yang menyimpan sebuah object
@@ -49,7 +49,7 @@ const postUserRouter = async (req, res, next) => {
 //Login
 const postLoginUser = async (req, res, next) => {
   try {
-    const connection = await mysql2.promise().getConnection();
+    const connection = await pool.promise().getConnection();
     await connection.beginTransaction();
     const { username, password } = req.body;
 
@@ -61,8 +61,6 @@ const postLoginUser = async (req, res, next) => {
     connection.release();
 
     const user = result[0];
-
-    console.log(user);
 
     res.status(200).send({ user });
     // if (user.isVerified === 1) {
