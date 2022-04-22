@@ -7,6 +7,7 @@ const { verify, sign } = require("../../services/token");
 const { sendVerificationEmail } = require("../../services/emails");
 
 const putUserRouter = async (req, res, next) => {
+  console.log("masuk");
   try {
     const connection = await pool.promise().getConnection();
     const sqlUpdateUser = "UPDATE users SET ? WHERE id = ?;";
@@ -22,26 +23,31 @@ const putUserRouter = async (req, res, next) => {
   }
 };
 
-const putResetPassword = async (req, res, next) => {
+const putResetPasswordRouter = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
-    const sql = "UPDATE users SET ? WHERE id = ?;";
-    const verifiedToken = verify(req.body.token);
-    console.log(verifiedToken);
+    const sql = "UPDATE users SET password = ? WHERE id = ?;";
+    const verifiedToken = verify(req.params.token);
+    console.log("string: ", verifiedToken);
 
-    const sqlNewPassword = [req.body.password, verifiedToken];
-    console.log(req.body.password);
-    sqlNewPassword[0].password = bcrypt.hashSync(sqlNewPassword[0].password);
+    const sqlNewPassword = bcrypt.hashSync(req.body.password);
+    // console.log(req.params.token);
+    // sqlNewPassword[0] = bcrypt.hashSync(sqlNewPassword[0]);
+    // console.log(sqlNewPassword);
 
-    const result = await connection.query(sql, sqlNewPassword);
+    const sqlNewNewPassword = [sqlNewPassword, verifiedToken.id];
+
+    const result = await connection.query(sql, sqlNewNewPassword);
     connection.release();
 
     res.status(200).send("Password has been reset");
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };
 
-router.put("/:userId", putUserRouter);
-router.put("/reset-password", putResetPassword);
+router.put("/update-user/:userId", putUserRouter);
+router.put("/reset-password/:token", putResetPasswordRouter);
 
 module.exports = router;

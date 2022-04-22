@@ -92,6 +92,7 @@ const postForgotPassword = async (req, res, next) => {
     connection.release();
 
     const user = result[0];
+    console.log(result);
     const token = sign({ id: user[0].id });
 
     res.status(200).send({ user: user[0], token });
@@ -99,12 +100,14 @@ const postForgotPassword = async (req, res, next) => {
     sendResetPasswordEmail({
       recipient: sqlEmail,
       subject: "Password Email Reset",
-      url: `${process.env.CLIENT_URL}/reset-password?token=${token}`,
+      url: `${process.env.CLIENT_URL}/reset-password/${token}}`,
       data: {
-        url: `${process.env.CLIENT_URL}/reset-password?token=${token}`,
+        url: `${process.env.CLIENT_URL}/reset-password/${token}}`,
       },
     });
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };
 
 router.post("/", postUserRouter);
