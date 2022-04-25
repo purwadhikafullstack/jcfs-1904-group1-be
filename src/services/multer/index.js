@@ -1,6 +1,19 @@
 const multer = require("multer");
 const path = require("path");
 
+<<<<<<< HEAD
+=======
+const avatarDirectory = path.join(__dirname, "../../../public/avatar");
+const storageAvatar = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, avatarDirectory);
+  },
+
+  filename: function (req, file, cb) {
+    cb(null, `${req.user.username}-avatar.png`);
+  },
+});
+>>>>>>> 1081e6f175c16105e33b6ffa9a3b01dd2a2dbf9a
 const imageDirectory = path.join(__dirname, "../../../public/images/products/");
 const imageStorage = multer.diskStorage({
   destination: function (req, file, cb) {

@@ -4,8 +4,12 @@ const router = require("express").Router();
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const { sign } = require("../../services/token");
-const { sendVerificationEmail } = require("../../services/emails");
+const {
+  sendVerificationEmail,
+  sendResetPasswordEmail,
+} = require("../../services/emails");
 
+// user register
 const postUserRouter = async (req, res, next) => {
   try {
     const sql = "INSERT INTO users SET ?";
@@ -33,11 +37,9 @@ const postUserRouter = async (req, res, next) => {
       recipient: data.email,
       subject: "Email Verification",
       username: data.username,
-      // url: `http://localhost:${process.env.API_PORT}/users/verify?token=${token}`,
       url: `${process.env.API_URL}/users/verify?token=${token}`,
       data: {
         username: data.username,
-        // url: `http://localhost:${process.env.API_PORT}/users/verify?token=${token}`,
         url: `${process.env.API_URL}/users/verify?token=${token}`,
       },
     });
@@ -46,7 +48,7 @@ const postUserRouter = async (req, res, next) => {
   }
 };
 
-//Login
+// user login
 const postLoginUser = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
@@ -62,7 +64,17 @@ const postLoginUser = async (req, res, next) => {
 
     const user = result[0];
 
+<<<<<<< HEAD
     res.status(200).send({ user });
+=======
+    const compareResult = bcrypt.compareSync(password, user[0].password);
+    if (!compareResult) {
+      return res.status(401).send({ message: "Log in cridentials invalid" });
+    }
+    const token = sign(user[0].id);
+
+    res.status(200).send({ user: user[0], token });
+>>>>>>> 1081e6f175c16105e33b6ffa9a3b01dd2a2dbf9a
     // if (user.isVerified === 1) {
     //   return res.status(200).send({ user });
     // } else {
@@ -73,7 +85,37 @@ const postLoginUser = async (req, res, next) => {
   }
 };
 
+// forgot password
+const postForgotPassword = async (req, res, next) => {
+  try {
+    const connection = await pool.promise().getConnection();
+    const sql = `SELECT id FROM users WHERE email = ?;`;
+    const sqlEmail = req.body.email;
+
+    const result = await connection.query(sql, sqlEmail);
+    connection.release();
+
+    const user = result[0];
+    console.log(result);
+    const token = sign({ id: user[0].id });
+
+    res.status(200).send({ user: user[0], token });
+
+    sendResetPasswordEmail({
+      recipient: sqlEmail,
+      subject: "Password Email Reset",
+      url: `${process.env.CLIENT_URL}/reset-password/${token}}`,
+      data: {
+        url: `${process.env.CLIENT_URL}/reset-password/${token}}`,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 router.post("/", postUserRouter);
 router.post("/login", postLoginUser);
+router.post("/forgot-password", postForgotPassword);
 
 module.exports = router;

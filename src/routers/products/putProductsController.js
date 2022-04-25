@@ -17,7 +17,7 @@ const putProductsRouter = router.put(
 
         let data = {
           productName: req.body.productName,
-          price: req.body.price,
+          priceStrip: req.body.priceStrip,
           dose: req.body.dose,
           description: req.body.description,
         };
