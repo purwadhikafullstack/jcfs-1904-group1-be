@@ -10,6 +10,10 @@ const putUserRouter = async (req, res, next) => {
   console.log("masuk");
   try {
     const connection = await pool.promise().getConnection();
+<<<<<<< HEAD
+    // await connection.beginTransaction();
+=======
+>>>>>>> 1081e6f175c16105e33b6ffa9a3b01dd2a2dbf9a
     const sqlUpdateUser = "UPDATE users SET ? WHERE id = ?;";
 
     const dataUpdateUser = [req.body, req.params.userId];
