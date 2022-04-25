@@ -65,12 +65,12 @@ const postLoginUser = async (req, res, next) => {
     const user = result[0];
 
     const compareResult = bcrypt.compareSync(password, user[0].password);
-
     if (!compareResult) {
       return res.status(401).send({ message: "Log in cridentials invalid" });
     }
+    const token = sign(user[0].id);
 
-    res.status(200).send({ user });
+    res.status(200).send({ user: user[0], token });
     // if (user.isVerified === 1) {
     //   return res.status(200).send({ user });
     // } else {

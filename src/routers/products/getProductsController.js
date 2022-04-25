@@ -53,7 +53,7 @@ const getProductsByCategoryRouter = router.get(
   async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
-      let sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name, stocks.isLiquid
+      let sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.priceStrip, products.productPhoto, products.dose, name, stocks.isLiquid
       FROM (((products_categories
       INNER JOIN products ON products_categories.product_id = products.id)
       INNER JOIN categories ON products_categories.category_id  = categories.id)
@@ -69,7 +69,7 @@ const getProductsByCategoryRouter = router.get(
       const dataCategory = req.params.category;
 
       if (req.query.sortBy && req.query.order) {
-        sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name, stocks.isLiquid
+        sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.priceStrip, products.productPhoto, products.dose, name, stocks.isLiquid
         FROM (((products_categories
         INNER JOIN products ON products_categories.product_id = products.id)
         INNER JOIN categories ON products_categories.category_id  = categories.id)

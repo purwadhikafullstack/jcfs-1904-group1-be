@@ -18,6 +18,6 @@ const putCartRouter = async (req, res, next) => {
   }
 };
 
-router.post("/:id", putCartRouter);
+router.put("/:id", putCartRouter);
 
 module.exports = { putCartRouter };
