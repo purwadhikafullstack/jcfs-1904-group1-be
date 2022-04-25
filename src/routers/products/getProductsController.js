@@ -53,7 +53,7 @@ const getProductsByCategoryRouter = router.get(
   async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
-      let sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name, stocks.isLiquid
+      let sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.priceStrip, products.productPhoto, products.dose, name, stocks.isLiquid
       FROM (((products_categories
       INNER JOIN products ON products_categories.product_id = products.id)
       INNER JOIN categories ON products_categories.category_id  = categories.id)
@@ -69,7 +69,7 @@ const getProductsByCategoryRouter = router.get(
       const dataCategory = req.params.category;
 
       if (req.query.sortBy && req.query.order) {
-        sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name, stocks.isLiquid
+        sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.priceStrip, products.productPhoto, products.dose, name, stocks.isLiquid
         FROM (((products_categories
         INNER JOIN products ON products_categories.product_id = products.id)
         INNER JOIN categories ON products_categories.category_id  = categories.id)
@@ -109,7 +109,7 @@ const getProductsByIdRouter = router.get(
       const dataId = req.params.id;
       const [result] = await connection.query(sqlGetProductsByCategory, dataId);
 
-      const sqlGetSimilarProducts = `SELECT p.id, productName, price, productPhoto, dose, name, SUM(boxSold + stripSold + pcsSold + mgSold) AS totalSold
+      const sqlGetSimilarProducts = `SELECT p.id, productName, priceStrip, productPhoto, dose, name, SUM(boxSold + stripSold + pcsSold + mgSold) AS totalSold
     FROM products p
     INNER JOIN products_categories pc ON p.id = pc.product_id
     INNER JOIN categories c ON pc.category_id = c.id
