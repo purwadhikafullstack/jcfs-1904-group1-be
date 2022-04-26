@@ -64,9 +64,6 @@ const postLoginUser = async (req, res, next) => {
 
     const user = result[0];
 
-<<<<<<< HEAD
-    res.status(200).send({ user });
-=======
     const compareResult = bcrypt.compareSync(password, user[0].password);
     if (!compareResult) {
       return res.status(401).send({ message: "Log in cridentials invalid" });
@@ -74,7 +71,6 @@ const postLoginUser = async (req, res, next) => {
     const token = sign(user[0].id);
 
     res.status(200).send({ user: user[0], token });
->>>>>>> 1081e6f175c16105e33b6ffa9a3b01dd2a2dbf9a
     // if (user.isVerified === 1) {
     //   return res.status(200).send({ user });
     // } else {
