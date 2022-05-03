@@ -1,14 +1,14 @@
 const pool = require("../../config/database");
 const router = require("express").Router();
 
-const putCartRouter = async (req, res, next) => {
+const deleteCartRouter = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
-    const sqlPostProduct = `update carts SET ? where user_id  = ?;`;
-    const data = { ...req.body, product_id: req.params.id };
+    const sqlDeleteCart = `delete carts where user_id = ?;`;
+    const data = req.params.id;
     // console.log(req.body);
-    const result = await connection.query(sqlPostProduct, data);
+    const result = await connection.query(sqlDeleteCart, data);
 
     connection.release();
 
@@ -18,6 +18,6 @@ const putCartRouter = async (req, res, next) => {
   }
 };
 
-router.post("/:id", putCartRouter);
+router.delete("/:id", deleteCartRouter);
 
-module.exports = { putCartRouter };
+module.exports = router;

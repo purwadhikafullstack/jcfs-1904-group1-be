@@ -24,7 +24,7 @@ const getCartRouter = async (req, res, next) => {
 
     connection.release();
 
-    res.status(200).send({ result, total, totalAfterTax });
+    res.status(200).send({ result, total, totalAfterTax, ppnObat, tax });
   } catch (error) {
     next(error);
   }
