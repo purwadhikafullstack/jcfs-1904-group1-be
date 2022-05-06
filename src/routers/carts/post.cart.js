@@ -2,7 +2,6 @@ const pool = require("../../config/database");
 const router = require("express").Router();
 
 const postCartRouter = async (req, res, next) => {
-  console.log(req.body);
   try {
     const connection = await pool.promise().getConnection();
 
