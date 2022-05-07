@@ -52,8 +52,23 @@ const getUserByIdRouter = async (req, res, next) => {
   }
 };
 
+const getUserCountRouter = async (req, res, next) => {
+  try {
+    const connection = await pool.promise().getConnection();
+
+    const sqlCountUser = `select count(id) as total from users
+    where isAdmin = 0 and isVerified = 1;`;
+    const [result] = await connection.query(sqlCountUser);
+    connection.release();
+    res.status(200).send({ result });
+  } catch (error) {
+    next(error);
+  }
+};
+
 router.get("/", getUserRouter);
 router.get("/verify", getVerifyRouter);
-router.get("/:userId", getUserByIdRouter);
+router.get("/user/:userId", getUserByIdRouter);
+router.get("/count", getUserCountRouter);
 
 module.exports = router;

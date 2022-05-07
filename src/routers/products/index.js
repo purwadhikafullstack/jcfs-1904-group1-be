@@ -6,6 +6,7 @@ const {
   getProductsByNameRouter,
   getCategoriesRouter,
   getProductsByIdRouter,
+  getAllProductAdminRouter,
 } = require("./getProductsController");
 
 const {
@@ -13,16 +14,23 @@ const {
   // postInputProductsRouter,
 } = require("./postProductsController");
 
-const { putProductsRouter } = require("./putProductsController");
+const {
+  putProductsRouter,
+  putDeleteRouter,
+  putUnDeleteRouter,
+} = require("./putProductsController");
 
 router.use(getAllProductRouter);
 router.use(getProductsByNameRouter);
 router.use(getProductsByCategoryRouter);
 router.use(getProductsByIdRouter);
 router.use(getCategoriesRouter);
+router.use(getAllProductAdminRouter);
 
 router.use(postUploadproductPhotoRouter);
 
 router.use(putProductsRouter);
+router.use(putDeleteRouter);
+router.use(putUnDeleteRouter);
 
 module.exports = router;

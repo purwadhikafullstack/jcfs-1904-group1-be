@@ -28,17 +28,18 @@ const getSalesReportRouter = router.get("/revenue", async (req, res, next) => {
       const dataInitSql = req.query.initYear + "-" + req.query.initMonth;
       const dataFinalSql = req.query.finalYear + "-" + req.query.finalMonth;
 
-      sqlSalesReport += ` WHERE DATE_FORMAT(t.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(t.createdAt, "%Y-%m") <= "${dataFinalSql}"
+      sqlSalesReport += ` WHERE t.status = "complete" AND WHERE DATE_FORMAT(t.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(t.createdAt, "%Y-%m") <= "${dataFinalSql}"
       LIMIT ${req.query.limit} OFFSET ${req.query.offSet}`;
 
-      sqlGetRevenue = `SELECT DATE_FORMAT(createdAt, '%b %Y') AS filter, SUM(amount) AS amount
+      sqlGetRevenue = ` SELECT DATE_FORMAT(createdAt, '%b %Y') AS filter, SUM(amount) AS amount
       FROM transactions
+      WHERE t.status = "complete" AND
       WHERE DATE_FORMAT(createdAt, "%Y-%m") >= "${dataInitSql}" AND DATE_FORMAT(createdAt, "%Y-%m") <= "${dataFinalSql}"
       GROUP BY filter;`;
 
-      sqlGetReportCount += ` WHERE DATE_FORMAT(t.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(t.createdAt, "%Y-%m") <= "${dataFinalSql}";`;
+      sqlGetReportCount += ` WHERE t.status = "complete" AND WHERE DATE_FORMAT(t.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(t.createdAt, "%Y-%m") <= "${dataFinalSql}";`;
     } else {
-      sqlSalesReport += ` ORDER BY date ASC
+      sqlSalesReport += ` WHERE t.status = "complete" ORDER BY date ASC
       LIMIT ${req.query.limit} OFFSET ${req.query.offSet};`;
     }
     const [results] = await connection.query(sqlSalesReport);
@@ -180,7 +181,29 @@ const getProductsReportRouter = router.get(
   }
 );
 
+const getAllTimeRevenueRouter = router.get(
+  `/all-revenue`,
+  async (req, res, next) => {
+    try {
+      const connection = await pool.promise().getConnection();
+      const sql = `SELECT sum(amount) as revenue FROM transactions where status = "complete";`;
+
+      const sqlSold = `SELECT sum(qty) as totalSold from detailTransaction dt 
+      inner join transactions t on t.id = dt.transaction_id
+      where t.status = "complete";`;
+
+      const [results] = await connection.query(sql);
+      const [sold] = await connection.query(sqlSold);
+      connection.release();
+      res.status(200).send({ results, sold });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 module.exports = {
   getSalesReportRouter,
   getProductsReportRouter,
+  getAllTimeRevenueRouter,
 };
