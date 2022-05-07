@@ -109,13 +109,14 @@ const getProductsByIdRouter = router.get(
       const dataId = req.params.id;
       const [result] = await connection.query(sqlGetProductsByCategory, dataId);
 
-      const sqlGetSimilarProducts = `SELECT p.id, productName, priceStrip, productPhoto, dose, name, SUM(boxSold + stripSold + pcsSold + mgSold) AS totalSold
-    FROM products p
-    INNER JOIN products_categories pc ON p.id = pc.product_id
-    INNER JOIN categories c ON pc.category_id = c.id
-    INNER JOIN stocks s ON s.product_id = p.id
-    WHERE c.name = ?
-    GROUP BY p.id ORDER BY totalSold DESC LIMIT 5;`;
+      const sqlGetSimilarProducts = `SELECT p.id, p.productName, p.priceStrip, p.productPhoto, p.dose, c.name, sum(dt.qty) as totalSold from detailTransaction dt 
+      inner join transactions t on t.id = dt.transaction_id
+      inner join products p on p.id = dt.product_id
+      inner join products_categories pc on pc.product_id = p.id
+      inner join categories c on pc.category_id = c.id
+      where t.status = "complete" AND c.name = ?
+      group by p.productName
+      order by totalSold desc limit 5;`;
       const dataSimilarProducts = req.params.category;
       const [resultSimilar] = await connection.query(
         sqlGetSimilarProducts,
