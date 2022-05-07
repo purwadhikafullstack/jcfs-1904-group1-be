@@ -31,7 +31,15 @@ const putProductsRouter = router.put(
 
           data = { ...data, productPhoto: finalImageURL };
         }
-
+        if (req.body.isLiquid == 1) {
+          data = data;
+        } else {
+          data = {
+            ...data,
+            priceBox: req.body.priceBox,
+            pricePcs: req.body.pricePcs,
+          };
+        }
         const [result] = await connection.query(sqlInput, data);
 
         const sqlInputCat = `UPDATE products_categories SET ? WHERE product_id = ${req.params.id};`;
@@ -45,8 +53,9 @@ const putProductsRouter = router.put(
         if (req.body.isLiquid == 1) {
           const dataStocks = {
             isLiquid: req.body.isLiquid,
-            qtyBoxTotal: req.body.qtyBoxTotal,
+
             qtyStripTotal: req.body.qtyBottleTotal,
+            qtyStripAvailable: req.body.qtyBottleTotal,
           };
 
           await connection.query(sqlInputStocks, dataStocks);
@@ -54,8 +63,10 @@ const putProductsRouter = router.put(
           const dataStocks = {
             isLiquid: req.body.isLiquid,
             qtyBoxTotal: req.body.qtyBoxTotal,
-            qtyStripTotal: req.body.qtyStripTotal,
+            qtyBoxAvailable: req.body.qtyBoxTotal,
+            qtyStripAvailable: req.body.qtyStripTotal,
             qtyPcsTotal: req.body.qtyPcsTotal,
+            qtyPcsAvailable: req.body.qtyPcsTotal,
           };
           await connection.query(sqlInputStocks, dataStocks);
         }
@@ -72,4 +83,30 @@ const putProductsRouter = router.put(
   }
 );
 
-module.exports = { putProductsRouter };
+const putDeleteRouter = router.put(`/:id/delete`, async (req, res, next) => {
+  try {
+    const connection = await pool.promise().getConnection();
+    const sql = `UPDATE products SET isDeleted = 1 WHERE id = ${req.params.id} `;
+    const result = await connection.query(sql);
+    connection.release();
+    res.status(200).send("Products deleted");
+  } catch (error) {
+    next(error);
+  }
+});
+const putUnDeleteRouter = router.put(
+  `/:id/undelete`,
+  async (req, res, next) => {
+    try {
+      const connection = await pool.promise().getConnection();
+      const sql = `UPDATE products SET isDeleted = 0 WHERE id = ${req.params.id} `;
+      const result = await connection.query(sql);
+      connection.release();
+      res.status(200).send("Products deleted");
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+module.exports = { putProductsRouter, putDeleteRouter, putUnDeleteRouter };

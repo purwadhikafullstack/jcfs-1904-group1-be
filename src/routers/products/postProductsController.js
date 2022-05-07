@@ -22,13 +22,23 @@ const postUploadproductPhotoRouter = router.post(
 
         const sqlInput = "INSERT INTO products SET ?;";
 
-        const data = {
+        let data = {
           productName: req.body.productName,
           productPhoto: finalImageURL,
           priceStrip: req.body.priceStrip,
           dose: req.body.dose,
           description: req.body.description,
         };
+
+        if (req.body.isLiquid == 1) {
+          data = data;
+        } else {
+          data = {
+            ...data,
+            priceBox: req.body.priceBox,
+            pricePcs: req.body.pricePcs,
+          };
+        }
         const [result] = await connection.query(sqlInput, data);
 
         const sqlInputCat = "INSERT INTO products_categories SET ?;";
@@ -43,8 +53,8 @@ const postUploadproductPhotoRouter = router.post(
           const dataStocks = {
             product_id: result.insertId,
             isLiquid: req.body.isLiquid,
-            qtyBoxTotal: req.body.qtyBox,
             qtyStripTotal: req.body.qtyBottle,
+            qtyStripAvailable: req.body.qtyBottle,
           };
           await connection.query(sqlInputStocks, dataStocks);
         } else {
@@ -52,8 +62,11 @@ const postUploadproductPhotoRouter = router.post(
             product_id: result.insertId,
             isLiquid: req.body.isLiquid,
             qtyBoxTotal: req.body.qtyBox,
+            qtyBoxAvailable: req.body.qtyBox,
             qtyStripTotal: req.body.qtyStrip,
+            qtyStripAvailable: req.body.qtyStrip,
             qtyPcsTotal: req.body.qtyPcs,
+            qtyPcsAvailable: req.body.qtyPcs,
           };
           await connection.query(sqlInputStocks, dataStocks);
         }
