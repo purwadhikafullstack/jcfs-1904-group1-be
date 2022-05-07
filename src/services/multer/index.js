@@ -28,6 +28,26 @@ const imageStorage = multer.diskStorage({
   },
 });
 
+const imageDirectoryPayment = path.join(
+  __dirname,
+  "../../../public/images/payments/"
+);
+const imageStoragePayment = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, imageDirectoryPayment);
+  },
+
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      path.parse(file.originalname).name +
+        "-" +
+        Date.now() +
+        path.extname(file.originalname)
+    );
+  },
+});
+
 const uploadImage = multer({
   storage: imageStorage,
   limits: {
@@ -43,4 +63,18 @@ const uploadImage = multer({
   },
 });
 
-module.exports = { uploadImage };
+const uploadImagePayment = multer({
+  storage: imageStoragePayment,
+  limits: {
+    fileSize: 10000000,
+  },
+  fileFilter(req, file, cb) {
+    const allowedExtension = [".png", ".jpg", ".jpeg"];
+    const extname = path.extname(file.originalname);
+
+    if (!allowedExtension.includes(extname))
+      return cb(new Error("Please upload image with ext (jpg, jpeg, png)"));
+    cb(null, true);
+  },
+});
+module.exports = { uploadImage, uploadImagePayment };

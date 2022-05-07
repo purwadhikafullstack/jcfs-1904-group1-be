@@ -11,6 +11,7 @@ const productsRouter = require("./src/routers/products");
 const cartRouter = require("./src/routers/carts");
 const categoriesRouter = require("./src/routers/categories");
 const transactionsRouter = require("./src/routers/transactions");
+const ordersRouter = require("./src/routers/orders");
 const logsRouter = require("./src/routers/logs");
 
 app.use(cors("*"));
@@ -24,6 +25,7 @@ app.use("/categories", categoriesRouter);
 app.use("/transactions", transactionsRouter);
 app.use("/carts", cartRouter);
 app.use("/logs", logsRouter);
+app.use("/orders", ordersRouter);
 
 app.get("/", (req, res) => {
   res.status(200).send("API 1-Pharmacy");

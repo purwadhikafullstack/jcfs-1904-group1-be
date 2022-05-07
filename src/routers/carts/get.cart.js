@@ -17,9 +17,10 @@ const getCartRouter = async (req, res, next) => {
       END * qty)  AS total
       FROM carts c
       inner join products p on p.id = c.product_id
-      where c.user_id = 8 && c.status = "cart";`;
+      where c.user_id = ? && c.status = "cart";`;
+    const dataUser = req.params.user_id;
 
-    const [results] = await connection.query(sqlGetProducts, data);
+    const [results] = await connection.query(sqlGetProducts, dataUser);
 
     const dataSend = results.map((result) => {
       let price;

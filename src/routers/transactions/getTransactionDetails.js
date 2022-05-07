@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
-const moment = require("moment");
 
 const getTransactionDetails = router.get(
   "/details/:transactionId",
