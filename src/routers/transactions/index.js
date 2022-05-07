@@ -4,6 +4,7 @@ const router = require("express").Router();
 const {
   getSalesReportRouter,
   getProductsReportRouter,
+  getAllTimeRevenueRouter,
 } = require("./getSalesReportController");
 
 const { getTransactionDetails } = require("./getTransactionDetails");
@@ -17,5 +18,6 @@ router.use(getSalesReportRouter);
 router.use(getProductsReportRouter);
 router.use(getTransactionDetails);
 router.use(getUserTransactionsRouter);
+router.use(getAllTimeRevenueRouter);
 
 module.exports = router;

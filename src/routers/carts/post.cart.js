@@ -6,15 +6,20 @@ const postCartRouter = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
-    const sqlCheckCart = `select * from carts where user_id = ? and product_id = ? and status = "cart";`;
-    const dataCheck = [req.body.user_id, req.body.product_id];
+    const sqlCheckCart = `select * from carts where user_id = ? and product_id = ? and status = "cart" and variant = ?;`;
+    const dataCheck = [req.body.user_id, req.body.product_id, req.body.variant];
 
     try {
       const [resultCheck] = await connection.query(sqlCheckCart, dataCheck);
 
       if (resultCheck[0]) {
-        const sqlUpdateCart = `update carts set qty = ? where user_id = ? and product_id = ? and status = "cart" ;`;
-        const dataUpdate = [resultCheck[0].qty + qty, user_id, product_id];
+        const sqlUpdateCart = `update carts set qty = ? where user_id = ? and product_id = ? and status = "cart" and variant = ? ;`;
+        const dataUpdate = [
+          resultCheck[0].qty + qty,
+          user_id,
+          product_id,
+          req.body.variant,
+        ];
 
         await connection.query(sqlUpdateCart, dataUpdate);
         connection.release();
@@ -65,7 +70,7 @@ const postCheckoutRouter = async (req, res, next) => {
           product.priceStrip,
           product.productPhoto,
           product.qty,
-          "Strip",
+          product.variant,
         ];
       });
       // console.log(sqlData);

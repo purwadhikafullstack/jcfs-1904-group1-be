@@ -150,10 +150,35 @@ const getProductsByNameRouter = router.get(
   }
 );
 
+const getAllProductAdminRouter = router.get(
+  "/admin",
+  async (req, res, next) => {
+    try {
+      const connection = await pool.promise().getConnection();
+
+      let sqlGetProducts = `SELECT *, p.id FROM products p
+    INNER JOIN products_categories pc ON p.id = pc.product_id
+    INNER JOIN categories c ON pc.category_id = c.id
+    INNER JOIN stocks s ON pc.product_id = s.product_id
+    LIMIT ${req.query.limit} OFFSET ${req.query.offSet};`;
+
+      const getTotalProducts = `SELECT COUNT(id) AS total FROM products`;
+
+      const [result] = await connection.query(sqlGetProducts);
+      const [resultTotal] = await connection.query(getTotalProducts);
+      connection.release();
+      res.status(200).send({ result, total: resultTotal[0].total });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 module.exports = {
   getAllProductRouter,
   getProductsByCategoryRouter,
   getProductsByNameRouter,
   getCategoriesRouter,
   getProductsByIdRouter,
+  getAllProductAdminRouter,
 };
