@@ -20,7 +20,7 @@ const getCartRouter = async (req, res, next) => {
       where c.user_id = ? && c.status = "cart";`;
     const dataUser = req.params.user_id;
 
-    const [results] = await connection.query(sqlGetProducts, data);
+    const [results] = await connection.query(sqlGetProducts, dataUser);
 
     const dataSend = results.map((result) => {
       let price;
@@ -37,7 +37,7 @@ const getCartRouter = async (req, res, next) => {
       };
     });
 
-    const [resultTotal] = await connection.query(sqlGetTotalPrice, dataUser);
+    const [resultTotal] = await connection.query(sqlGetTotalPrice, data);
 
     const total = parseInt(resultTotal[0].total);
     const ppnObat = 0.1;

@@ -1,3 +1,4 @@
+const { query } = require("../../config/database");
 const pool = require("../../config/database");
 const router = require("express").Router();
 
@@ -84,7 +85,36 @@ const postCheckoutRouter = async (req, res, next) => {
       // variant: req.body.variant,
 
       const [resultt] = await connection.query(sqlInputDetails, [sqlData]);
-      console.log(resultt);
+
+      const sqlUpdateCheckout = `update carts set status = "checkout" where user_id = ? and status = "cart";`;
+
+      const [status] = await connection.query(
+        sqlUpdateCheckout,
+        req.body.user_id
+      );
+
+      let sqlUpdateQty = "";
+      let dataBox = [];
+      req.body.carts.forEach((product) => {
+        if (product.variant == "box") {
+          sqlUpdateQty = `update stocks set qtyBoxAvailable = qtyBoxAvailable - ? where product_id = ?`;
+          dataBox = [product.qty, product.product_id];
+        } else if (product.variant == "strip") {
+          sqlUpdateQty = `update stocks set qtyStripAvailable = qtyStripAvailable - ? where product_id = ?`;
+          dataBox = [product.qty, product.product_id];
+        } else if (product.variant == "bottle") {
+          sqlUpdateQty = `update stocks set qtyStripAvailable = qtyStripAvailable - ? where product_id = ?`;
+          dataBox = [product.qty, product.product_id];
+        } else if (product.variant == "pcs") {
+          sqlUpdateQty = `update stocks set qtyPcsAvailable = qtyPcsAvailable - ? where product_id = ?`;
+          dataBox = [product.qty, product.product_id];
+        }
+      });
+      await connection.query(sqlUpdateQty, dataBox);
+      // const sqlCart = req.body.carts.map((product) => {
+      // return [product.qty, product.product_id];
+      // });
+      const sqlProductId = req.body;
       connection.commit();
       res.status(200).send("Checkout success, new transaction created");
     } catch (error) {
