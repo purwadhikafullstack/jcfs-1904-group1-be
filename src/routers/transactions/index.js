@@ -6,7 +6,7 @@ const {
   getProductsReportRouter,
 } = require("./getSalesReportController");
 
-const { postCheckoutRouter } = require("./postCheckoutController");
+const { getTransactionDetails } = require("./getTransactionDetails");
 
 // get user
 const {
@@ -15,7 +15,7 @@ const {
 
 router.use(getSalesReportRouter);
 router.use(getProductsReportRouter);
-router.use(postCheckoutRouter);
+router.use(getTransactionDetails);
 router.use(getUserTransactionsRouter);
 
 module.exports = router;
