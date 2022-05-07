@@ -13,6 +13,7 @@ const getSalesReportRouter = router.get("/revenue", async (req, res, next) => {
 
     let sqlGetRevenue = `SELECT DATE_FORMAT(createdAt, '%Y') AS filter, SUM(amount) AS amount
     FROM transactions
+    WHERE status = "complete"
     GROUP BY filter`;
 
     let sqlGetReportCount = `SELECT COUNT(t.id) AS total 
@@ -31,9 +32,9 @@ const getSalesReportRouter = router.get("/revenue", async (req, res, next) => {
       sqlSalesReport += ` WHERE t.status = "complete" AND WHERE DATE_FORMAT(t.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(t.createdAt, "%Y-%m") <= "${dataFinalSql}"
       LIMIT ${req.query.limit} OFFSET ${req.query.offSet}`;
 
-      sqlGetRevenue = ` SELECT DATE_FORMAT(createdAt, '%b %Y') AS filter, SUM(amount) AS amount
+      sqlGetRevenue = `SELECT DATE_FORMAT(createdAt, '%b %Y') AS filter, SUM(amount) AS amount
       FROM transactions
-      WHERE t.status = "complete" AND
+      WHERE status = "complete" AND
       WHERE DATE_FORMAT(createdAt, "%Y-%m") >= "${dataInitSql}" AND DATE_FORMAT(createdAt, "%Y-%m") <= "${dataFinalSql}"
       GROUP BY filter;`;
 

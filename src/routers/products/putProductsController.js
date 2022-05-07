@@ -9,6 +9,7 @@ const putProductsRouter = router.put(
   `/:id`,
   multerUploadSingle,
   async (req, res, next) => {
+    console.log(req.body);
     try {
       const connection = await pool.promise().getConnection();
       await connection.beginTransaction();
@@ -65,14 +66,165 @@ const putProductsRouter = router.put(
             qtyBoxTotal: req.body.qtyBoxTotal,
             qtyBoxAvailable: req.body.qtyBoxTotal,
             qtyStripAvailable: req.body.qtyStripTotal,
+            qtyStripTotal: req.body.qtyStripTotal,
             qtyPcsTotal: req.body.qtyPcsTotal,
             qtyPcsAvailable: req.body.qtyPcsTotal,
           };
           await connection.query(sqlInputStocks, dataStocks);
         }
 
+        if (req.body.isLiquid == 0) {
+          const sqlLog = `INSERT INTO logs(product_id, user_id, description, type, amount, current_stock) values ?;`;
+          if (
+            req.body.qtyBoxTotal > req.body.qtyBoxCurrent ||
+            req.body.qtyStripTotal > req.body.qtyStripCurrent ||
+            req.body.qtyPcsTotal > req.body.qtyPcsCurrent
+          ) {
+            const dataLog = [
+              [
+                req.body.id,
+                req.body.user_id,
+                "Restock",
+                "box",
+                parseInt(req.body.qtyBoxTotal) -
+                  parseInt(req.body.qtyBoxCurrent),
+                req.body.qtyBoxTotal,
+              ],
+              [
+                req.body.id,
+                req.body.user_id,
+                "Restock",
+                "strip",
+                parseInt(req.body.qtyStripTotal) -
+                  parseInt(req.body.qtyStripCurrent),
+                req.body.qtyStripTotal,
+              ],
+              [
+                req.body.id,
+                req.body.user_id,
+                "Restock",
+                "pcs",
+                parseInt(req.body.qtyPcsTotal) -
+                  parseInt(req.body.qtyPcsCurrent),
+                req.body.qtyPcsTotal,
+              ],
+            ];
+            if (req.body.qtyBoxTotal === req.body.qtyBoxCurrent) {
+              dataLog.splice(0, 1);
+              if (req.body.qtyStripTotal === req.body.qtyStripCurrent) {
+                dataLog.splice(0, 1);
+              } else if (req.body.qtyPcsTotal === req.body.qtyPcsCurrent) {
+                dataLog.splice(1, 1);
+              }
+            } else if (req.body.qtyStripTotal === req.body.qtyStripCurrent) {
+              dataLog.splice(1, 1);
+              if (req.body.qtyBoxTotal === req.body.qtyBoxCurrent) {
+                dataLog.splice(0, 1);
+              } else if (req.body.qtyPcsTotal === req.body.qtyPcsCurrent) {
+                dataLog.splice(1, 1);
+              }
+            } else if (req.body.qtyPcsTotal === req.body.qtyPcsCurrent) {
+              dataLog.splice(2, 1);
+              if (req.body.qtyStripTotal === req.body.qtyStripCurrent) {
+                dataLog.splice(1, 1);
+              } else if (req.body.qtyStripTotal === req.body.qtyStripCurrent) {
+                dataLog.splice(0, 1);
+              }
+            }
+
+            await connection.query(sqlLog, [dataLog]);
+          } else if (
+            req.body.qtyBoxTotal < req.body.qtyBoxCurrent ||
+            req.body.qtyStripTotal < req.body.qtyStripCurrent ||
+            req.body.qtyPcsTotal < req.body.qtyPcsCurrent
+          ) {
+            const dataLog = [
+              [
+                req.body.id,
+                req.body.user_id,
+                "Edit Qty",
+                "box",
+                parseInt(req.body.qtyBoxTotal) -
+                  parseInt(req.body.qtyBoxCurrent),
+                req.body.qtyBoxTotal,
+              ],
+              [
+                req.body.id,
+                req.body.user_id,
+                "Edit Qty",
+                "strip",
+                parseInt(req.body.qtyStripTotal) -
+                  parseInt(req.body.qtyStripCurrent),
+                req.body.qtyStripTotal,
+              ],
+              [
+                req.body.id,
+                req.body.user_id,
+                "Edit Qty",
+                "pcs",
+                parseInt(req.body.qtyPcsTotal) -
+                  parseInt(req.body.qtyPcsCurrent),
+                req.body.qtyPcsTotal,
+              ],
+            ];
+
+            if (req.body.qtyBoxTotal === req.body.qtyBoxCurrent) {
+              dataLog.splice(0, 1);
+              if (req.body.qtyStripTotal === req.body.qtyStripCurrent) {
+                dataLog.splice(0, 1);
+              } else if (req.body.qtyPcsTotal === req.body.qtyPcsCurrent) {
+                dataLog.splice(1, 1);
+              }
+            } else if (req.body.qtyStripTotal === req.body.qtyStripCurrent) {
+              dataLog.splice(1, 1);
+              if (req.body.qtyBoxTotal === req.body.qtyBoxCurrent) {
+                dataLog.splice(0, 1);
+              } else if (req.body.qtyPcsTotal === req.body.qtyPcsCurrent) {
+                dataLog.splice(1, 1);
+              }
+            } else if (req.body.qtyPcsTotal === req.body.qtyPcsCurrent) {
+              dataLog.splice(2, 1);
+              if (req.body.qtyStripTotal === req.body.qtyStripCurrent) {
+                dataLog.splice(1, 1);
+              } else if (req.body.qtyStripTotal === req.body.qtyStripCurrent) {
+                dataLog.splice(0, 1);
+              }
+            }
+
+            await connection.query(sqlLog, [dataLog]);
+          }
+        } else {
+          const sqlLog = `INSERT INTO logs SET ?;`;
+          if (req.body.qtyBottleTotal > req.body.qtyBottleCurrent) {
+            const dataLog = {
+              product_id: req.body.id,
+              user_id: req.body.user_id,
+              description: "Restock",
+              type: "bottle",
+              amount:
+                parseInt(req.body.qtyBottleTotal) -
+                parseInt(req.body.qtyBottleCurrent),
+              current_stock: req.body.qtyBottleTotal,
+            };
+
+            await connection.query(sqlLog, dataLog);
+          } else if (req.body.qtyBottleTotal < req.body.qtyBottleCurrent) {
+            const dataLog = {
+              product_id: req.body.id,
+              user_id: req.body.user_id,
+              description: "Edit Qty",
+              type: "bottle",
+              amount:
+                parseInt(req.body.qtyBottleTotal) -
+                parseInt(req.body.qtyBottleCurrent),
+              current_stock: req.body.qtyBottleTotal,
+            };
+            await connection.query(sqlLog, dataLog);
+          }
+        }
+
         connection.commit();
-        res.status(200).send({ Message: "Update Data Succes" });
+        res.status(200).send({ Message: "Update Data Successfully" });
       } catch (error) {
         connection.rollback;
         next(error);

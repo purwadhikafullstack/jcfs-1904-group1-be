@@ -71,6 +71,49 @@ const postUploadproductPhotoRouter = router.post(
           await connection.query(sqlInputStocks, dataStocks);
         }
 
+        if (req.body.isLiquid === 1) {
+          const sqlLog = `INSERT INTO logs SET ?;`;
+          const dataLog = {
+            product_id: result.insertId,
+            user_id: req.body.user_id,
+            description: "New Product",
+            type: "bottle",
+            amount: req.body.qtyBottle,
+            current_stock: req.body.qtyBottle,
+          };
+          await connection.query(sqlLog, dataLog);
+        } else {
+          const sqlLog = `INSERT INTO logs(product_id, user_id, description, type, amount, current_stock) values ?;`;
+          const dataLog = [
+            [
+              result.insertId,
+              req.body.user_id,
+              "New Product",
+              "box",
+              req.body.qtyBox,
+              req.body.qtyBox,
+            ],
+            [
+              result.insertId,
+              req.body.user_id,
+              "New Product",
+              "strip",
+              req.body.qtyStrip,
+              req.body.qtyStrip,
+            ],
+            [
+              result.insertId,
+              req.body.user_id,
+              "New Product",
+              "pcs",
+              req.body.qtyPcs,
+              req.body.qtyPcs,
+            ],
+          ];
+
+          await connection.query(sqlLog, [dataLog]);
+        }
+
         connection.commit();
         res.status(200).send({ Message: "Input Product Success" });
       } catch (error) {
