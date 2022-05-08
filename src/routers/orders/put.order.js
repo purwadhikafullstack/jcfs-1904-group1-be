@@ -63,7 +63,6 @@ const putOrderRouter = async (req, res, next) => {
             return dataLog;
           }
           const a = await connection.query(sqlInsertLog, dataLog);
-          console.log(a);
         });
       }
       connection.commit();

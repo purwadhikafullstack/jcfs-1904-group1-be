@@ -92,7 +92,6 @@ const postForgotPassword = async (req, res, next) => {
     connection.release();
 
     const user = result[0];
-    console.log(result);
     const token = sign({ id: user[0].id });
 
     res.status(200).send({ user: user[0], token });
