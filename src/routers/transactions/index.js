@@ -9,7 +9,10 @@ const {
 
 const { getAllTransactions } = require("./getAllTransactions");
 
-const { getTransactionDetails } = require("./getTransactionDetails");
+const {
+  getTransactionDetails,
+  getCustomOrderRouter,
+} = require("./getTransactionDetails");
 
 // get user
 const {
@@ -18,12 +21,20 @@ const {
 
 const { putPaymentPhotoRouter } = require("./putPaymentPhoto");
 
+const {
+  postCheckoutRouter,
+} = require("./postTransactionCustomOrderController");
+
 router.use(getSalesReportRouter);
 router.use(getProductsReportRouter);
 router.use(getTransactionDetails);
 router.use(getUserTransactionsRouter);
 router.use(getAllTimeRevenueRouter);
-router.use(putPaymentPhotoRouter);
 router.use(getAllTransactions);
+router.use(getCustomOrderRouter);
+
+router.use(putPaymentPhotoRouter);
+
+router.use(postCheckoutRouter);
 
 module.exports = router;

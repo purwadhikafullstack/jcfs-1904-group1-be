@@ -117,14 +117,20 @@ const postCheckoutRouter = async (req, res, next) => {
   }
 };
 
-const postDetailsRouter = async (req, res, next) => {
+const postCartCustomRouter = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
-    const sqlDetails = `insert into detailtransaction set ?;`;
-    const sqlDetailsData = req.body;
+    const sqlDetails = `insert into carts(user_id, product_id, qty, status, variant) values ?;`;
+    const sqlDetailsData = req.body.selected.map((product) => {
+      if (product.isLiquid === 1) {
+        return [req.body.user_id, product.id, 1, "custom", "bottle"];
+      } else {
+        return [req.body.user_id, product.id, 1, "custom", "pcs"];
+      }
+    });
 
-    const result = await connection.query(sqlDetails, sqlDetailsData);
+    const result = await connection.query(sqlDetails, [sqlDetailsData]);
     connection.release();
     res.status(200).send([result]);
   } catch (error) {
@@ -134,6 +140,6 @@ const postDetailsRouter = async (req, res, next) => {
 
 router.post("/", postCartRouter);
 router.post("/checkout", postCheckoutRouter);
-router.post("/details", postDetailsRouter);
+router.post("/details/custom", postCartCustomRouter);
 
 module.exports = router;

@@ -19,21 +19,27 @@ const router = require("express").Router();
 // };
 
 const increaseQtyRouter = async (req, res, next) => {
-  const { user_id, product_id, qty } = req.body;
+  const { user_id, product_id, qty, status } = req.body;
   try {
     const connection = await pool.promise().getConnection();
 
-    const sqlCheckCart = `select qty from carts where user_id = ? and product_id = ? and status = "cart" and variant = ?;`;
-    const dataCheck = [req.body.user_id, req.body.product_id, req.body.variant];
+    const sqlCheckCart = `select qty from carts where user_id = ? and product_id = ? and status = ? and variant = ?;`;
+    const dataCheck = [
+      req.body.user_id,
+      req.body.product_id,
+      req.body.status,
+      req.body.variant,
+    ];
 
     try {
       const [resultCheck] = await connection.query(sqlCheckCart, dataCheck);
 
-      const sqlUpdateCart = `update carts set qty = ? where user_id = ? and product_id = ? and status = "cart" and variant = ? ;`;
+      const sqlUpdateCart = `update carts set qty = ? where user_id = ? and product_id = ? and status = ? and variant = ? ;`;
       const dataUpdate = [
         resultCheck[0].qty + 1,
         user_id,
         product_id,
+        status,
         req.body.variant,
       ];
 
@@ -49,21 +55,27 @@ const increaseQtyRouter = async (req, res, next) => {
 };
 
 const decreaseQtyRouter = async (req, res, next) => {
-  const { user_id, product_id, qty } = req.body;
+  const { user_id, product_id, qty, status } = req.body;
   try {
     const connection = await pool.promise().getConnection();
 
-    const sqlCheckCart = `select qty from carts where user_id = ? and product_id = ? and status = "cart" and variant = ?;`;
-    const dataCheck = [req.body.user_id, req.body.product_id, req.body.variant];
+    const sqlCheckCart = `select qty from carts where user_id = ? and product_id = ? and status = ? and variant = ?;`;
+    const dataCheck = [
+      req.body.user_id,
+      req.body.product_id,
+      req.body.status,
+      req.body.variant,
+    ];
 
     try {
       const [resultCheck] = await connection.query(sqlCheckCart, dataCheck);
 
-      const sqlUpdateCart = `update carts set qty = ? where user_id = ? and product_id = ? and status = "cart" and variant = ? ;`;
+      const sqlUpdateCart = `update carts set qty = ? where user_id = ? and product_id = ? and status = ? and variant = ? ;`;
       const dataUpdate = [
         resultCheck[0].qty - 1,
         user_id,
         product_id,
+        status,
         req.body.variant,
       ];
 

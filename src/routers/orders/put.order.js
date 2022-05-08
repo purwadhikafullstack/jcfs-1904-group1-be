@@ -1,7 +1,6 @@
 require("dotenv").config();
 const pool = require("../../config/database");
 const router = require("express").Router();
-
 const putOrderRouter = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
@@ -78,7 +77,5 @@ const putOrderRouter = async (req, res, next) => {
     next(error);
   }
 };
-
 router.put("/update/:id", putOrderRouter);
-
 module.exports = router;

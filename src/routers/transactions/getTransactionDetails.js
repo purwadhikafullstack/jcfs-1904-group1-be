@@ -23,4 +23,35 @@ const getTransactionDetails = router.get(
   }
 );
 
-module.exports = { getTransactionDetails };
+const getCustomOrderRouter = router.get(
+  "/details/custom/:transactionId",
+  async (req, res, next) => {
+    // const { invoice, user_id, status, amount } = req.body;
+    try {
+      const connection = await pool.promise().getConnection();
+
+      const sqlDetails = `SELECT *
+      FROM transactions t
+      WHERE t.id = ?;`;
+      const sqlData = req.params.transactionId;
+
+      const [order] = await connection.query(sqlDetails, sqlData);
+
+      const sqlGetProducts = `SELECT *, p.id FROM products p
+    INNER JOIN products_categories pc ON p.id = pc.product_id
+    INNER JOIN categories c ON pc.category_id = c.id
+    INNER JOIN stocks s ON pc.product_id = s.product_id
+    WHERE p.isDeleted = 0 ORDER BY p.productName ASC;`;
+
+      const [products] = await connection.query(sqlGetProducts);
+
+      connection.release();
+
+      res.status(200).send({ order, products });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+module.exports = { getTransactionDetails, getCustomOrderRouter };
