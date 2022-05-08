@@ -31,7 +31,7 @@ const getTransactionDetail = router.get(
     try {
       const connection = await pool.promise().getConnection();
 
-      const sqlTransactions = `select amount, invoice, transaction_id, product_id, prescriptionPhoto, productName, productPrice, productPhoto, qty, variant, d.createdAt, d.updatedAt, user_id, status, paymentPhoto, isByPrescription  from detailTransaction d 
+      const sqlTransactions = `select t.user_id, amount, invoice, transaction_id, product_id, t.prescriptionPhoto, productName, productPrice, productPhoto, qty, variant, d.createdAt, d.updatedAt, user_id, status, paymentPhoto, isByPrescription  from detailTransaction d 
       inner join transactions t on t.id = d.transaction_id
         where transaction_id = ?;`;
       const sqlUser = req.params.transactionId;

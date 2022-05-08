@@ -74,16 +74,6 @@ const postCheckoutRouter = async (req, res, next) => {
           product.variant,
         ];
       });
-      // console.log(sqlData);
-      // transaction_id: result.insertId,
-      // product_id: req.body.product_id,
-      // prescriptionPhoto: req.body.prescriptionPhoto,
-      // productName: req.body.productName,
-      // productPrice: req.body.productPrice,
-      // productPhoto: req.body.productPhoto,
-      // qty: req.body.qty,
-      // variant: req.body.variant,
-
       const [resultt] = await connection.query(sqlInputDetails, [sqlData]);
 
       const sqlUpdateCheckout = `update carts set status = "checkout" where user_id = ? and status = "cart";`;
@@ -95,26 +85,27 @@ const postCheckoutRouter = async (req, res, next) => {
 
       let sqlUpdateQty = "";
       let dataBox = [];
-      req.body.carts.forEach((product) => {
+
+      req.body.carts.forEach(async (product) => {
         if (product.variant == "box") {
           sqlUpdateQty = `update stocks set qtyBoxAvailable = qtyBoxAvailable - ? where product_id = ?`;
           dataBox = [product.qty, product.product_id];
+          await connection.query(sqlUpdateQty, dataBox);
         } else if (product.variant == "strip") {
           sqlUpdateQty = `update stocks set qtyStripAvailable = qtyStripAvailable - ? where product_id = ?`;
           dataBox = [product.qty, product.product_id];
+          await connection.query(sqlUpdateQty, dataBox);
         } else if (product.variant == "bottle") {
           sqlUpdateQty = `update stocks set qtyStripAvailable = qtyStripAvailable - ? where product_id = ?`;
           dataBox = [product.qty, product.product_id];
+          await connection.query(sqlUpdateQty, dataBox);
         } else if (product.variant == "pcs") {
           sqlUpdateQty = `update stocks set qtyPcsAvailable = qtyPcsAvailable - ? where product_id = ?`;
           dataBox = [product.qty, product.product_id];
+          await connection.query(sqlUpdateQty, dataBox);
         }
       });
-      await connection.query(sqlUpdateQty, dataBox);
-      // const sqlCart = req.body.carts.map((product) => {
-      // return [product.qty, product.product_id];
-      // });
-      const sqlProductId = req.body;
+
       connection.commit();
       res.status(200).send("Checkout success, new transaction created");
     } catch (error) {
