@@ -63,15 +63,51 @@ const postCheckoutRouter = async (req, res, next) => {
 
       const sqlInputDetails = `insert into detailTransaction (transaction_id, product_id, productName, productPrice, productPhoto, qty, variant) values ?;`;
       const sqlData = req.body.carts.map((product) => {
-        return [
-          result.insertId,
-          product.product_id,
-          product.productName,
-          product.priceStrip,
-          product.productPhoto,
-          product.qty,
-          product.variant,
-        ];
+        if (product.variant === "box") {
+          return [
+            result.insertId,
+            product.product_id,
+            product.productName,
+            product.priceBox,
+            product.productPhoto,
+            product.qty,
+            product.variant,
+          ];
+        }
+        if (product.variant === "strip") {
+          return [
+            result.insertId,
+            product.product_id,
+            product.productName,
+            product.priceStrip,
+            product.productPhoto,
+            product.qty,
+            product.variant,
+          ];
+        }
+        if (product.variant === "bottle") {
+          return [
+            result.insertId,
+            product.product_id,
+            product.productName,
+            product.priceStrip,
+            product.productPhoto,
+            product.qty,
+            product.variant,
+          ];
+        }
+        if (product.variant === "pcs") {
+          return [
+            result.insertId,
+            product.product_id,
+            product.productName,
+            product.pricePcs,
+            product.productPhoto,
+            product.qty,
+            product.variant,
+          ];
+        }
+        return;
       });
       const [resultt] = await connection.query(sqlInputDetails, [sqlData]);
 

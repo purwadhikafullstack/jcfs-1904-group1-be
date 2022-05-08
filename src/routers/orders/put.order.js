@@ -50,7 +50,7 @@ const putOrderRouter = async (req, res, next) => {
               product.qty,
               result[0].qtyStripTotal,
             ];
-            return dataLog;
+            await connection.query(sqlInsertLog, dataLog);
           } else if (product.variant === "box") {
             dataLog = [
               product.product_id,
@@ -60,9 +60,9 @@ const putOrderRouter = async (req, res, next) => {
               product.qty,
               result[0].qtyBoxTotal,
             ];
-            return dataLog;
+
+            await connection.query(sqlInsertLog, dataLog);
           }
-          const a = await connection.query(sqlInsertLog, dataLog);
         });
       }
       connection.commit();

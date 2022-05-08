@@ -41,6 +41,7 @@ const increaseQtyRouter = async (req, res, next) => {
 
 const decreaseQtyRouter = async (req, res, next) => {
   const { user_id, product_id, qty, status } = req.body;
+  console.log(req.body);
   try {
     const connection = await pool.promise().getConnection();
 
