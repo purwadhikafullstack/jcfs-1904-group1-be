@@ -7,8 +7,11 @@ const putOrderRouter = async (req, res, next) => {
     await connection.beginTransaction();
     try {
       const sqlUpdateOrder = "UPDATE transactions SET status = ? WHERE id = ?;";
+
       const dataOrder = [req.body.status, req.params.id];
+
       const result = await connection.query(sqlUpdateOrder, dataOrder);
+
       if (req.body.status === "sending") {
         let sqlUpdateQtyTotal = "";
         let dataBox = [];
@@ -32,13 +35,12 @@ const putOrderRouter = async (req, res, next) => {
           }
         });
 
-        const sqlInsertLog = `INSERT INTO logs(product_id, user_id, description, type, amount, current_stock) values ?;`;
-        let dataLog = [];
         req.body.transaction.forEach(async (product) => {
+          const sqlInsertLog = `INSERT INTO logs(product_id, user_id, description, type, amount, current_stock) values ?;`;
           const sqlgetStock = `select * from stocks where product_id = ?`;
+          let dataLog = [];
           const dataId = product.product_id;
           const [result] = await connection.query(sqlgetStock, dataId);
-
           if (product.variant === "bottle") {
             dataLog = [
               product.product_id,
@@ -48,11 +50,24 @@ const putOrderRouter = async (req, res, next) => {
               product.qty,
               result[0].qtyStripTotal,
             ];
+            return dataLog;
+          } else if (product.variant === "box") {
+            dataLog = [
+              product.product_id,
+              product.user_id,
+              "sold",
+              "box",
+              product.qty,
+              result[0].qtyBoxTotal,
+            ];
+            return dataLog;
           }
+          const a = await connection.query(sqlInsertLog, dataLog);
+          console.log(a);
         });
-        await connection.query(sqlInsertLog, dataLog);
       }
       connection.commit();
+
       res.status(200).send("Order status updated");
     } catch (error) {
       connection.rollback();
