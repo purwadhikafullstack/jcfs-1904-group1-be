@@ -6,6 +6,7 @@ const postCheckoutRouter = router.post(
   "/checkout/:userId/:transactionId",
   async (req, res, next) => {
     // const { invoice, user_id, status, amount } = req.body;
+    console.log(req.body);
     try {
       const connection = await pool.promise().getConnection();
       await connection.beginTransaction();
@@ -21,15 +22,28 @@ const postCheckoutRouter = router.post(
 
         const sqlInputDetails = `insert into detailTransaction (transaction_id, product_id, productName, productPrice, productPhoto, qty, variant) values ?;`;
         const sqlData = req.body.carts.map((product) => {
-          return [
-            req.params.transactionId,
-            product.product_id,
-            product.productName,
-            product.priceStrip,
-            product.productPhoto,
-            product.qty,
-            product.variant,
-          ];
+          if (product.variant === "pcs") {
+            return [
+              req.params.transactionId,
+              product.product_id,
+              product.productName,
+              product.pricePcs,
+              product.productPhoto,
+              product.qty,
+              product.variant,
+            ];
+          } else if (product.variant === "bottle") {
+            return [
+              req.params.transactionId,
+              product.product_id,
+              product.productName,
+              product.priceStrip,
+              product.productPhoto,
+              product.qty,
+              product.variant,
+            ];
+          }
+          return;
         });
 
         const [resultt] = await connection.query(sqlInputDetails, [sqlData]);
