@@ -1,17 +1,23 @@
 require("dotenv").config();
 const pool = require("../../config/database");
 const router = require("express").Router();
-const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const { verify, sign } = require("../../services/token");
 const { sendVerificationEmail } = require("../../services/emails");
+const { uploadImageAvatar } = require("../../services/multer");
+
+const multerUploadSingle = uploadImageAvatar.single("userPhoto");
 
 const putUserRouter = async (req, res, next) => {
   try {
+    console.log(req.body);
+    let finalImageURL =
+      req.protocol + "://" + req.get("host") + "/avatar/" + req.file.filename;
+    console.log(req.body);
     const connection = await pool.promise().getConnection();
-    const sqlUpdateUser = "UPDATE users SET ? WHERE id = ?;";
+    const sqlUpdateUser = `UPDATE users SET ? WHERE id = ${req.params.userId};`;
 
-    const dataUpdateUser = [req.body, req.params.userId];
+    const dataUpdateUser = { ...req.body, userPhoto: finalImageURL };
 
     const result = await connection.query(sqlUpdateUser, dataUpdateUser);
     connection.release();
@@ -30,9 +36,6 @@ const putResetPasswordRouter = async (req, res, next) => {
     const verifiedToken = verify(req.params.token);
 
     const sqlNewPassword = bcrypt.hashSync(req.body.password);
-    // console.log(req.params.token);
-    // sqlNewPassword[0] = bcrypt.hashSync(sqlNewPassword[0]);
-    // console.log(sqlNewPassword);
 
     const sqlNewNewPassword = [sqlNewPassword, verifiedToken.id];
 

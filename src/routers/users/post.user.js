@@ -99,9 +99,9 @@ const postForgotPassword = async (req, res, next) => {
     sendResetPasswordEmail({
       recipient: sqlEmail,
       subject: "Password Email Reset",
-      url: `${process.env.CLIENT_URL}/reset-password/${token}}`,
+      url: `${process.env.CLIENT_URL}/reset-password/${token}`,
       data: {
-        url: `${process.env.CLIENT_URL}/reset-password/${token}}`,
+        url: `${process.env.CLIENT_URL}/reset-password/${token}`,
       },
     });
   } catch (error) {

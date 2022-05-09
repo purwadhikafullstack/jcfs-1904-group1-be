@@ -25,6 +25,8 @@ const {
   postCheckoutRouter,
 } = require("./postTransactionCustomOrderController");
 
+const { getCustomTransactionDetails } = require("./getCustomTransactionUser");
+
 router.use(getSalesReportRouter);
 router.use(getProductsReportRouter);
 router.use(getTransactionDetails);
@@ -32,6 +34,7 @@ router.use(getUserTransactionsRouter);
 router.use(getAllTimeRevenueRouter);
 router.use(getAllTransactions);
 router.use(getCustomOrderRouter);
+router.use(getCustomTransactionDetails);
 
 router.use(putPaymentPhotoRouter);
 

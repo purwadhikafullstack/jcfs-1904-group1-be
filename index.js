@@ -13,6 +13,7 @@ const categoriesRouter = require("./src/routers/categories");
 const transactionsRouter = require("./src/routers/transactions");
 const ordersRouter = require("./src/routers/orders");
 const logsRouter = require("./src/routers/logs");
+const profilePhotoRouter = require("./src/routers/profile-photo");
 
 app.use(cors("*"));
 app.use(express.json());
@@ -26,6 +27,7 @@ app.use("/transactions", transactionsRouter);
 app.use("/carts", cartRouter);
 app.use("/logs", logsRouter);
 app.use("/orders", ordersRouter);
+app.use("/uploads", profilePhotoRouter);
 
 app.get("/", (req, res) => {
   res.status(200).send("API 1-Pharmacy");

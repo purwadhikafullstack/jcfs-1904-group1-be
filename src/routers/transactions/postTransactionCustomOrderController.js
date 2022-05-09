@@ -1,6 +1,9 @@
 const { query } = require("../../config/database");
 const pool = require("../../config/database");
+const { uploadImagePrescription } = require("../../services/multer");
 const router = require("express").Router();
+
+const multerUploadSingle = uploadImagePrescription.single("prescriptionPhoto");
 
 const postCheckoutRouter = router.post(
   "/checkout/:userId/:transactionId",
@@ -80,4 +83,33 @@ const postCheckoutRouter = router.post(
   }
 );
 
-module.exports = { postCheckoutRouter };
+const postNewCustom = router.post(
+  "/upload/:userId",
+  multerUploadSingle,
+  async (req, res, next) => {
+    try {
+      let finalImageURL =
+        req.protocol +
+        "://" +
+        req.get("host") +
+        "/images/prescriptions/" +
+        req.file.filename;
+      const connection = await pool.promise().getConnection();
+      const sqlCheckout = `insert into transactions set ?;`;
+      const sqlCheckoutData = {
+        invoice: req.body.invoice,
+        user_id: req.body.user_id,
+        status: "custom",
+        isByPrescription: 1,
+        prescriptionPhoto: finalImageURL,
+        amount: 0,
+      };
+      const result = await connection.query(sqlCheckout, sqlCheckoutData);
+      res.status(200).send("Upload prescription -> admin");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+module.exports = { postCheckoutRouter, postNewCustom };
