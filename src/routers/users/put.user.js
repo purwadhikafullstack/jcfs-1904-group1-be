@@ -11,13 +11,10 @@ const multerUploadSingle = uploadImageAvatar.single("userPhoto");
 const putUserRouter = async (req, res, next) => {
   try {
     console.log(req.body);
-    let finalImageURL =
-      req.protocol + "://" + req.get("host") + "/avatar/" + req.file.filename;
-    console.log(req.body);
     const connection = await pool.promise().getConnection();
     const sqlUpdateUser = `UPDATE users SET ? WHERE id = ${req.params.userId};`;
 
-    const dataUpdateUser = { ...req.body, userPhoto: finalImageURL };
+    const dataUpdateUser = req.body;
 
     const result = await connection.query(sqlUpdateUser, dataUpdateUser);
     connection.release();

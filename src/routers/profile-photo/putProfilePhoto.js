@@ -15,7 +15,7 @@ const putProfilePhoto = router.put(
 
       console.log(req.body);
       let finalImageURL =
-        req.protocol + "://" + req.get("host") + "/avatar" + req.file.filename;
+        req.protocol + "://" + req.get("host") + "/avatar/" + req.file.filename;
       const sqlInput = `UPDATE users SET ? WHERE id = ${req.params.id};`;
 
       const dataPhoto = {
