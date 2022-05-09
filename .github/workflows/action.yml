@@ -16,9 +16,9 @@ jobs:
       - name: Deploy 1_pharmacy API with github action
         uses: appleboy/ssh-action@master
         with:
-          host: 172.105.115.129
-          username: "root"
-          password: "PurwadhikaJCWD;"
+          host: ${{secrets.SSH_HOST}}
+          username: ${{secrets.SSH_USERNAME}}
+          password: ${{secrets.SSH_PASSWORD}}
           port: 22
           script: |
             cd ~/app/1-pharmacy-api
