@@ -4,9 +4,6 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const { verify, sign } = require("../../services/token");
 const { sendVerificationEmail } = require("../../services/emails");
-const { uploadImageAvatar } = require("../../services/multer");
-
-const multerUploadSingle = uploadImageAvatar.single("userPhoto");
 
 const putUserRouter = async (req, res, next) => {
   try {
