@@ -29,16 +29,16 @@ const getSalesReportRouter = router.get("/revenue", async (req, res, next) => {
       const dataInitSql = req.query.initYear + "-" + req.query.initMonth;
       const dataFinalSql = req.query.finalYear + "-" + req.query.finalMonth;
 
-      sqlSalesReport += ` WHERE t.status = "complete" AND WHERE DATE_FORMAT(t.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(t.createdAt, "%Y-%m") <= "${dataFinalSql}"
+      sqlSalesReport += ` WHERE t.status = "complete" AND DATE_FORMAT(t.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(t.createdAt, "%Y-%m") <= "${dataFinalSql}"
       LIMIT ${req.query.limit} OFFSET ${req.query.offSet}`;
 
-      sqlGetRevenue = ` SELECT DATE_FORMAT(createdAt, '%b %Y') AS filter, SUM(amount) AS amount
+      sqlGetRevenue = `SELECT DATE_FORMAT(createdAt, '%b %Y') AS filter, SUM(amount) AS amount
       FROM transactions
       WHERE status = "complete" AND
-      WHERE DATE_FORMAT(createdAt, "%Y-%m") >= "${dataInitSql}" AND DATE_FORMAT(createdAt, "%Y-%m") <= "${dataFinalSql}"
+      DATE_FORMAT(createdAt, "%Y-%m") >= "${dataInitSql}" AND DATE_FORMAT(createdAt, "%Y-%m") <= "${dataFinalSql}"
       GROUP BY filter;`;
 
-      sqlGetReportCount += ` WHERE t.status = "complete" AND WHERE DATE_FORMAT(t.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(t.createdAt, "%Y-%m") <= "${dataFinalSql}";`;
+      sqlGetReportCount += ` WHERE t.status = "complete" AND DATE_FORMAT(t.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(t.createdAt, "%Y-%m") <= "${dataFinalSql}";`;
     } else {
       sqlSalesReport += ` WHERE t.status = "complete" ORDER BY date ASC
       LIMIT ${req.query.limit} OFFSET ${req.query.offSet};`;
@@ -78,25 +78,31 @@ const getProductsReportRouter = router.get(
       FROM detailtransaction dt
       INNER JOIN transactions t ON dt.transaction_id = t.id
       INNER JOIN users u ON t.user_id = u.id
-      INNER JOIN products p ON dt.product_id = p.id`;
+      INNER JOIN products p ON dt.product_id = p.id
+      WHERE t.status = "complete"`;
 
       let sqlGetProductsReportCount = `SELECT COUNT(dt.id) AS total
       FROM detailtransaction dt
       INNER JOIN transactions t ON dt.transaction_id = t.id
       INNER JOIN users u ON t.user_id = u.id
-      INNER JOIN products p ON dt.product_id = p.id`;
+      INNER JOIN products p ON dt.product_id = p.id
+      WHERE t.status = "complete"`;
 
       let sqlGetProductByCategory = `SELECT c.id, c.name, SUM(dt.qty) AS sold,  DATE_FORMAT(dt.createdAt, "%Y-%m") as date
       FROM detailtransaction dt 
+      INNER JOIN transactions t ON dt.transaction_id = t.id
       INNER JOIN products p ON p.id = dt.product_id
       INNER JOIN products_categories pc ON p.id = pc.product_id
-      INNER JOIN categories c ON pc.category_id = c.id`;
+      INNER JOIN categories c ON pc.category_id = c.id
+      WHERE t.status = "complete"`;
 
       let sqlGetProductsSalesByMonth = `SELECT dt.id, p.productName, SUM(dt.qty) AS sold, variant, DATE_FORMAT(dt.createdAt, "%Y %m") as date
       FROM detailtransaction dt 
+      INNER JOIN transactions t ON dt.transaction_id = t.id
       INNER JOIN products p ON p.id = dt.product_id
       INNER JOIN products_categories pc ON p.id = pc.product_id
-      INNER JOIN categories c ON pc.category_id = c.id`;
+      INNER JOIN categories c ON pc.category_id = c.id
+      WHERE t.status = "complete"`;
 
       let sqlGetProducts = `SELECT id, productName FROM products`;
 
@@ -111,13 +117,13 @@ const getProductsReportRouter = router.get(
       ) {
         // const addSql = `WHERE DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}"`
 
-        sqlGetProductsReport += ` WHERE DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}" AND p.productName = "${req.query.productName}"`;
+        sqlGetProductsReport += ` AND DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}" AND p.productName = "${req.query.productName}"`;
 
-        sqlGetProductsReportCount += ` WHERE DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}" AND p.productName = "${req.query.productName}";`;
+        sqlGetProductsReportCount += ` AND DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}" AND p.productName = "${req.query.productName}";`;
 
-        sqlGetProductByCategory += ` WHERE DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}"`;
+        sqlGetProductByCategory += ` AND DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}"`;
 
-        sqlGetProductsSalesByMonth += ` WHERE DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}" AND p.productName = "${req.query.productName}"`;
+        sqlGetProductsSalesByMonth += ` AND DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}" AND p.productName = "${req.query.productName}"`;
       } else if (
         req.query.productName &&
         !req.query.initMonth &&
@@ -125,11 +131,11 @@ const getProductsReportRouter = router.get(
         !req.query.finalMonth &&
         !req.query.finalYear
       ) {
-        sqlGetProductsReport += ` WHERE p.productName = "${req.query.productName}"`;
+        sqlGetProductsReport += ` AND p.productName = "${req.query.productName}"`;
 
-        sqlGetProductsReportCount += ` WHERE p.productName = "${req.query.productName}"`;
+        sqlGetProductsReportCount += ` AND p.productName = "${req.query.productName}"`;
 
-        sqlGetProductsSalesByMonth += ` WHERE p.productName = "${req.query.productName}"`;
+        sqlGetProductsSalesByMonth += ` AND p.productName = "${req.query.productName}"`;
       } else if (
         !req.query.productName &&
         req.query.initMonth &&
@@ -137,13 +143,13 @@ const getProductsReportRouter = router.get(
         req.query.finalMonth &&
         req.query.finalYear
       ) {
-        sqlGetProductsReport += ` WHERE DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}"`;
+        sqlGetProductsReport += ` AND DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}"`;
 
-        sqlGetProductsReportCount += ` WHERE DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}";`;
+        sqlGetProductsReportCount += ` AND DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}";`;
 
-        sqlGetProductByCategory += ` WHERE DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}"`;
+        sqlGetProductByCategory += ` AND DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}"`;
 
-        sqlGetProductsSalesByMonth += ` WHERE DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}"`;
+        sqlGetProductsSalesByMonth += ` AND DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}"`;
       }
 
       sqlGetProductsReport += ` ORDER BY date ASC
@@ -152,7 +158,7 @@ const getProductsReportRouter = router.get(
       sqlGetProductByCategory += ` GROUP BY c.name
       ORDER BY c.name ASC;`;
 
-      sqlGetProductsSalesByMonth += ` GROUP BY date, variant
+      sqlGetProductsSalesByMonth += ` GROUP BY date, variant, p.productName
       ORDER BY date ASC;`;
 
       const [products] = await connection.query(sqlGetProducts);

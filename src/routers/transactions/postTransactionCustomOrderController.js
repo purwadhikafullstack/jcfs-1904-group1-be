@@ -60,16 +60,18 @@ const postCheckoutRouter = router.post(
 
         let sqlUpdateQty = "";
         let dataBox = [];
-        req.body.carts.forEach((product) => {
+
+        req.body.carts.forEach(async (product) => {
           if (product.variant == "bottle") {
             sqlUpdateQty = `update stocks set qtyStripAvailable = qtyStripAvailable - ? where product_id = ?`;
             dataBox = [product.qty, product.product_id];
+            await connection.query(sqlUpdateQty, dataBox);
           } else if (product.variant == "pcs") {
             sqlUpdateQty = `update stocks set qtyPcsAvailable = qtyPcsAvailable - ? where product_id = ?`;
             dataBox = [product.qty, product.product_id];
+            await connection.query(sqlUpdateQty, dataBox);
           }
         });
-        await connection.query(sqlUpdateQty, dataBox);
 
         connection.commit();
         res.status(200).send("Checkout successfully");

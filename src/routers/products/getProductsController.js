@@ -114,7 +114,7 @@ const getProductsByIdRouter = router.get(
       inner join products p on p.id = dt.product_id
       inner join products_categories pc on pc.product_id = p.id
       inner join categories c on pc.category_id = c.id
-      where t.status = "complete" AND c.name = ?
+      where t.status = "complete" AND p.isDeleted = 0 AND c.name = ?
       group by p.productName
       order by totalSold desc limit 5;`;
       const dataSimilarProducts = req.params.category;

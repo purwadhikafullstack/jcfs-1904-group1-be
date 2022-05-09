@@ -71,7 +71,7 @@ const postUploadproductPhotoRouter = router.post(
           await connection.query(sqlInputStocks, dataStocks);
         }
 
-        if (req.body.isLiquid === 1) {
+        if (req.body.isLiquid == 1) {
           const sqlLog = `INSERT INTO logs SET ?;`;
           const dataLog = {
             product_id: result.insertId,

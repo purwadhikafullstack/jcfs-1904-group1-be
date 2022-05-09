@@ -85,8 +85,10 @@ const putProductsRouter = router.put(
                 req.body.user_id,
                 "Restock",
                 "box",
-                parseInt(req.body.qtyBoxTotal) -
-                  parseInt(req.body.qtyBoxCurrent),
+                Math.abs(
+                  parseInt(req.body.qtyBoxTotal) -
+                    parseInt(req.body.qtyBoxCurrent)
+                ),
                 req.body.qtyBoxTotal,
               ],
               [
@@ -94,8 +96,10 @@ const putProductsRouter = router.put(
                 req.body.user_id,
                 "Restock",
                 "strip",
-                parseInt(req.body.qtyStripTotal) -
-                  parseInt(req.body.qtyStripCurrent),
+                Math.abs(
+                  parseInt(req.body.qtyStripTotal) -
+                    parseInt(req.body.qtyStripCurrent)
+                ),
                 req.body.qtyStripTotal,
               ],
               [
@@ -103,8 +107,10 @@ const putProductsRouter = router.put(
                 req.body.user_id,
                 "Restock",
                 "pcs",
-                parseInt(req.body.qtyPcsTotal) -
-                  parseInt(req.body.qtyPcsCurrent),
+                Math.abs(
+                  parseInt(req.body.qtyPcsTotal) -
+                    parseInt(req.body.qtyPcsCurrent)
+                ),
                 req.body.qtyPcsTotal,
               ],
             ];
@@ -143,8 +149,10 @@ const putProductsRouter = router.put(
                 req.body.user_id,
                 "Edit Qty",
                 "box",
-                parseInt(req.body.qtyBoxTotal) -
-                  parseInt(req.body.qtyBoxCurrent),
+                Math.abs(
+                  parseInt(req.body.qtyBoxTotal) -
+                    parseInt(req.body.qtyBoxCurrent)
+                ),
                 req.body.qtyBoxTotal,
               ],
               [
@@ -152,8 +160,10 @@ const putProductsRouter = router.put(
                 req.body.user_id,
                 "Edit Qty",
                 "strip",
-                parseInt(req.body.qtyStripTotal) -
-                  parseInt(req.body.qtyStripCurrent),
+                Math.abs(
+                  parseInt(req.body.qtyStripTotal) -
+                    parseInt(req.body.qtyStripCurrent)
+                ),
                 req.body.qtyStripTotal,
               ],
               [
@@ -161,8 +171,10 @@ const putProductsRouter = router.put(
                 req.body.user_id,
                 "Edit Qty",
                 "pcs",
-                parseInt(req.body.qtyPcsTotal) -
-                  parseInt(req.body.qtyPcsCurrent),
+                Math.abs(
+                  parseInt(req.body.qtyPcsTotal) -
+                    parseInt(req.body.qtyPcsCurrent)
+                ),
                 req.body.qtyPcsTotal,
               ],
             ];
@@ -200,9 +212,10 @@ const putProductsRouter = router.put(
               user_id: req.body.user_id,
               description: "Restock",
               type: "bottle",
-              amount:
+              amount: Math.abs(
                 parseInt(req.body.qtyBottleTotal) -
-                parseInt(req.body.qtyBottleCurrent),
+                  parseInt(req.body.qtyBottleCurrent)
+              ),
               current_stock: req.body.qtyBottleTotal,
             };
 
@@ -213,9 +226,10 @@ const putProductsRouter = router.put(
               user_id: req.body.user_id,
               description: "Edit Qty",
               type: "bottle",
-              amount:
+              amount: Math.abs(
                 parseInt(req.body.qtyBottleTotal) -
-                parseInt(req.body.qtyBottleCurrent),
+                  parseInt(req.body.qtyBottleCurrent)
+              ),
               current_stock: req.body.qtyBottleTotal,
             };
             await connection.query(sqlLog, dataLog);

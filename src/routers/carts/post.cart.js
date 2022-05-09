@@ -6,11 +6,15 @@ const postCartRouter = async (req, res, next) => {
   const { user_id, product_id, qty } = req.body;
   try {
     const connection = await pool.promise().getConnection();
-
-    const sqlCheckCart = `select * from carts where user_id = ? and product_id = ? and status = "cart" and variant = ?;`;
-    const dataCheck = [req.body.user_id, req.body.product_id, req.body.variant];
+    await connection.beginTransaction();
 
     try {
+      const sqlCheckCart = `select * from carts where user_id = ? and product_id = ? and status = "cart" and variant = ?;`;
+      const dataCheck = [
+        req.body.user_id,
+        req.body.product_id,
+        req.body.variant,
+      ];
       const [resultCheck] = await connection.query(sqlCheckCart, dataCheck);
 
       if (resultCheck[0]) {
@@ -23,18 +27,17 @@ const postCartRouter = async (req, res, next) => {
         ];
 
         await connection.query(sqlUpdateCart, dataUpdate);
-        connection.release();
         res.status(200).send("ada data gan");
       } else {
         const sqlPostProduct = `INSERT INTO carts SET ?;`;
         const data = req.body;
         const result = await connection.query(sqlPostProduct, data);
 
-        connection.release();
-
+        connection.commit();
         res.status(200).send("masuk gan");
       }
     } catch (error) {
+      connection.rollback();
       next(error);
     }
   } catch (error) {
