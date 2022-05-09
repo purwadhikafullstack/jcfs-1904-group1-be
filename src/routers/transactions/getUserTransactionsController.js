@@ -3,7 +3,6 @@ const pool = require("../../config/database");
 const moment = require("moment");
 
 const getUserTransactionsRouter = router.get("/:id", async (req, res, next) => {
-  console.log(req.query);
   try {
     const connection = await pool.promise().getConnection();
 

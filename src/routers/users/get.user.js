@@ -43,7 +43,8 @@ const getUserByIdRouter = async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
-    const sqlGetUserById = "select * from users where id = ?";
+    const sqlGetUserById =
+      "select id, username, email, password, fullName, userPhoto, age, gender, address from users where id = ?";
     const result = await connection.query(sqlGetUserById, req.params.userId);
     connection.release();
     res.status(200).send({ result });

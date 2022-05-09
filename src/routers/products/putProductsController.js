@@ -9,7 +9,6 @@ const putProductsRouter = router.put(
   `/:id`,
   multerUploadSingle,
   async (req, res, next) => {
-    console.log(req.body);
     try {
       const connection = await pool.promise().getConnection();
       await connection.beginTransaction();

@@ -49,7 +49,6 @@ const postCheckoutRouter = async (req, res, next) => {
   // const { invoice, user_id, status, amount } = req.body;
   const data = req.body.carts[0];
   try {
-    // console.log("checkout");
     const connection = await pool.promise().getConnection();
     await connection.beginTransaction();
 

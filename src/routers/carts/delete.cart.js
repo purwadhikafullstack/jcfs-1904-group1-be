@@ -7,7 +7,6 @@ const deleteCartRouter = async (req, res, next) => {
 
     const sqlDeleteCart = `delete carts where user_id = ?;`;
     const data = req.params.id;
-    // console.log(req.body);
     const result = await connection.query(sqlDeleteCart, data);
 
     connection.release();
