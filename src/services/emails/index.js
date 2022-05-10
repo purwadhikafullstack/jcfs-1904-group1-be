@@ -28,4 +28,19 @@ const sendVerificationEmail = async ({ recipient, subject, username, url }) => {
   }
 };
 
-module.exports = { sendVerificationEmail };
+const sendResetPasswordEmail = async ({ recipient, subject, url }) => {
+  try {
+    const mail = {
+      from: "Reset Password <axaladyx.gmail.com>",
+      to: recipient,
+      subject,
+      html: `<h2> Please click the link below to reset your password</h2>
+        <a href=${url}> Click Here </a>`,
+    };
+    const result = await courier.sendMail(mail);
+  } catch (error) {
+    console.log({ error });
+  }
+};
+
+module.exports = { sendVerificationEmail, sendResetPasswordEmail };

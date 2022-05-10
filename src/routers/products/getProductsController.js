@@ -53,7 +53,7 @@ const getProductsByCategoryRouter = router.get(
   async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
-      let sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name, stocks.isLiquid
+      let sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.priceStrip, products.productPhoto, products.dose, name, stocks.isLiquid
       FROM (((products_categories
       INNER JOIN products ON products_categories.product_id = products.id)
       INNER JOIN categories ON products_categories.category_id  = categories.id)
@@ -69,7 +69,7 @@ const getProductsByCategoryRouter = router.get(
       const dataCategory = req.params.category;
 
       if (req.query.sortBy && req.query.order) {
-        sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.price, products.productPhoto, products.dose, name, stocks.isLiquid
+        sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.priceStrip, products.productPhoto, products.dose, name, stocks.isLiquid
         FROM (((products_categories
         INNER JOIN products ON products_categories.product_id = products.id)
         INNER JOIN categories ON products_categories.category_id  = categories.id)
@@ -109,13 +109,14 @@ const getProductsByIdRouter = router.get(
       const dataId = req.params.id;
       const [result] = await connection.query(sqlGetProductsByCategory, dataId);
 
-      const sqlGetSimilarProducts = `SELECT p.id, productName, price, productPhoto, dose, name, SUM(boxSold + stripSold + pcsSold + mgSold) AS totalSold
-    FROM products p
-    INNER JOIN products_categories pc ON p.id = pc.product_id
-    INNER JOIN categories c ON pc.category_id = c.id
-    INNER JOIN stocks s ON s.product_id = p.id
-    WHERE c.name = ?
-    GROUP BY p.id ORDER BY totalSold DESC LIMIT 5;`;
+      const sqlGetSimilarProducts = `SELECT p.id, p.productName, p.priceStrip, p.productPhoto, p.dose, c.name, sum(dt.qty) as totalSold from detailTransaction dt 
+      inner join transactions t on t.id = dt.transaction_id
+      inner join products p on p.id = dt.product_id
+      inner join products_categories pc on pc.product_id = p.id
+      inner join categories c on pc.category_id = c.id
+      where t.status = "complete" AND p.isDeleted = 0 AND c.name = ?
+      group by p.productName
+      order by totalSold desc limit 5;`;
       const dataSimilarProducts = req.params.category;
       const [resultSimilar] = await connection.query(
         sqlGetSimilarProducts,
@@ -150,10 +151,35 @@ const getProductsByNameRouter = router.get(
   }
 );
 
+const getAllProductAdminRouter = router.get(
+  "/admin",
+  async (req, res, next) => {
+    try {
+      const connection = await pool.promise().getConnection();
+
+      let sqlGetProducts = `SELECT *, p.id FROM products p
+    INNER JOIN products_categories pc ON p.id = pc.product_id
+    INNER JOIN categories c ON pc.category_id = c.id
+    INNER JOIN stocks s ON pc.product_id = s.product_id
+    LIMIT ${req.query.limit} OFFSET ${req.query.offSet};`;
+
+      const getTotalProducts = `SELECT COUNT(id) AS total FROM products`;
+
+      const [result] = await connection.query(sqlGetProducts);
+      const [resultTotal] = await connection.query(getTotalProducts);
+      connection.release();
+      res.status(200).send({ result, total: resultTotal[0].total });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 module.exports = {
   getAllProductRouter,
   getProductsByCategoryRouter,
   getProductsByNameRouter,
   getCategoriesRouter,
   getProductsByIdRouter,
+  getAllProductAdminRouter,
 };

@@ -22,13 +22,23 @@ const postUploadproductPhotoRouter = router.post(
 
         const sqlInput = "INSERT INTO products SET ?;";
 
-        const data = {
+        let data = {
           productName: req.body.productName,
           productPhoto: finalImageURL,
-          price: req.body.price,
+          priceStrip: req.body.priceStrip,
           dose: req.body.dose,
           description: req.body.description,
         };
+
+        if (req.body.isLiquid == 1) {
+          data = data;
+        } else {
+          data = {
+            ...data,
+            priceBox: req.body.priceBox,
+            pricePcs: req.body.pricePcs,
+          };
+        }
         const [result] = await connection.query(sqlInput, data);
 
         const sqlInputCat = "INSERT INTO products_categories SET ?;";
@@ -43,8 +53,8 @@ const postUploadproductPhotoRouter = router.post(
           const dataStocks = {
             product_id: result.insertId,
             isLiquid: req.body.isLiquid,
-            qtyBoxTotal: req.body.qtyBox,
             qtyStripTotal: req.body.qtyBottle,
+            qtyStripAvailable: req.body.qtyBottle,
           };
           await connection.query(sqlInputStocks, dataStocks);
         } else {
@@ -52,10 +62,56 @@ const postUploadproductPhotoRouter = router.post(
             product_id: result.insertId,
             isLiquid: req.body.isLiquid,
             qtyBoxTotal: req.body.qtyBox,
+            qtyBoxAvailable: req.body.qtyBox,
             qtyStripTotal: req.body.qtyStrip,
+            qtyStripAvailable: req.body.qtyStrip,
             qtyPcsTotal: req.body.qtyPcs,
+            qtyPcsAvailable: req.body.qtyPcs,
           };
           await connection.query(sqlInputStocks, dataStocks);
+        }
+
+        if (req.body.isLiquid == 1) {
+          const sqlLog = `INSERT INTO logs SET ?;`;
+          const dataLog = {
+            product_id: result.insertId,
+            user_id: req.body.user_id,
+            description: "New Product",
+            type: "bottle",
+            amount: req.body.qtyBottle,
+            current_stock: req.body.qtyBottle,
+          };
+          await connection.query(sqlLog, dataLog);
+        } else {
+          const sqlLog = `INSERT INTO logs(product_id, user_id, description, type, amount, current_stock) values ?;`;
+          const dataLog = [
+            [
+              result.insertId,
+              req.body.user_id,
+              "New Product",
+              "box",
+              req.body.qtyBox,
+              req.body.qtyBox,
+            ],
+            [
+              result.insertId,
+              req.body.user_id,
+              "New Product",
+              "strip",
+              req.body.qtyStrip,
+              req.body.qtyStrip,
+            ],
+            [
+              result.insertId,
+              req.body.user_id,
+              "New Product",
+              "pcs",
+              req.body.qtyPcs,
+              req.body.qtyPcs,
+            ],
+          ];
+
+          await connection.query(sqlLog, [dataLog]);
         }
 
         connection.commit();
