@@ -1,11 +1,15 @@
 require("dotenv").config();
-const { mysql2 } = require("../../config/database");
+const pool = require("../../config/database");
 const router = require("express").Router();
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const { sign } = require("../../services/token");
-const { sendVerificationEmail } = require("../../services/emails");
+const {
+  sendVerificationEmail,
+  sendResetPasswordEmail,
+} = require("../../services/emails");
 
+// user register
 const postUserRouter = async (req, res, next) => {
   try {
     const sql = "INSERT INTO users SET ?";
@@ -18,7 +22,7 @@ const postUserRouter = async (req, res, next) => {
     data.password = bcrypt.hashSync(data.password);
 
     // bikin koneksi
-    const connection = await mysql2.promise().getConnection();
+    const connection = await pool.promise().getConnection();
     // simpan data baru, akan me return id nya
     const [result] = await connection.query(sql, data);
     // membuat token yang menyimpan sebuah object
@@ -33,11 +37,9 @@ const postUserRouter = async (req, res, next) => {
       recipient: data.email,
       subject: "Email Verification",
       username: data.username,
-      // url: `http://localhost:${process.env.API_PORT}/users/verify?token=${token}`,
       url: `${process.env.API_URL}/users/verify?token=${token}`,
       data: {
         username: data.username,
-        // url: `http://localhost:${process.env.API_PORT}/users/verify?token=${token}`,
         url: `${process.env.API_URL}/users/verify?token=${token}`,
       },
     });
@@ -46,10 +48,10 @@ const postUserRouter = async (req, res, next) => {
   }
 };
 
-//Login
+// user login
 const postLoginUser = async (req, res, next) => {
   try {
-    const connection = await mysql2.promise().getConnection();
+    const connection = await pool.promise().getConnection();
     await connection.beginTransaction();
     const { username, password } = req.body;
 
@@ -62,9 +64,13 @@ const postLoginUser = async (req, res, next) => {
 
     const user = result[0];
 
-    console.log(user);
+    const compareResult = bcrypt.compareSync(password, user[0].password);
+    if (!compareResult) {
+      return res.status(401).send({ message: "Log in cridentials invalid" });
+    }
+    const token = sign(user[0].id);
 
-    res.status(200).send({ user });
+    res.status(200).send({ user: user[0], token });
     // if (user.isVerified === 1) {
     //   return res.status(200).send({ user });
     // } else {
@@ -75,7 +81,36 @@ const postLoginUser = async (req, res, next) => {
   }
 };
 
+// forgot password
+const postForgotPassword = async (req, res, next) => {
+  try {
+    const connection = await pool.promise().getConnection();
+    const sql = `SELECT id FROM users WHERE email = ?;`;
+    const sqlEmail = req.body.email;
+
+    const result = await connection.query(sql, sqlEmail);
+    connection.release();
+
+    const user = result[0];
+    const token = sign({ id: user[0].id });
+
+    res.status(200).send({ user: user[0], token });
+
+    sendResetPasswordEmail({
+      recipient: sqlEmail,
+      subject: "Password Email Reset",
+      url: `${process.env.CLIENT_URL}/reset-password/${token}`,
+      data: {
+        url: `${process.env.CLIENT_URL}/reset-password/${token}`,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 router.post("/", postUserRouter);
 router.post("/login", postLoginUser);
+router.post("/forgot-password", postForgotPassword);
 
 module.exports = router;
