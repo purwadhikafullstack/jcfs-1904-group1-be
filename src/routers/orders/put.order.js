@@ -16,19 +16,19 @@ const putOrderRouter = async (req, res, next) => {
         let sqlUpdateQtyTotal = "";
         let dataBox = [];
         req.body.transaction.forEach(async (product) => {
-          if (product.variant == "box") {
+          if (product.variant === "box") {
             sqlUpdateQtyTotal = `update stocks set qtyBoxTotal = qtyBoxTotal - ? where product_id = ?`;
             dataBox = [product.qty, product.product_id];
             await connection.query(sqlUpdateQtyTotal, dataBox);
-          } else if (product.variant == "strip") {
+          } else if (product.variant === "strip") {
             sqlUpdateQtyTotal = `update stocks set qtyStripTotal = qtyStripTotal - ? where product_id = ?`;
             dataBox = [product.qty, product.product_id];
             await connection.query(sqlUpdateQtyTotal, dataBox);
-          } else if (product.variant == "bottle") {
+          } else if (product.variant === "bottle") {
             sqlUpdateQtyTotal = `update stocks set qtyStripTotal = qtyStripTotal - ? where product_id = ?`;
             dataBox = [product.qty, product.product_id];
             await connection.query(sqlUpdateQtyTotal, dataBox);
-          } else if (product.variant == "pcs") {
+          } else if (product.variant === "pcs") {
             sqlUpdateQtyTotal = `update stocks set qtyPcsTotal = qtyPcsTotal - ? where product_id = ?`;
             dataBox = [product.qty, product.product_id];
             await connection.query(sqlUpdateQtyTotal, dataBox);
