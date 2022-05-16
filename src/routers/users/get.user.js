@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 const { verify } = require("../../services/token");
+const { CLIENT_URL } = process.env;
 
 const getUserRouter = async (req, res, next) => {
   try {
@@ -29,10 +30,11 @@ const getVerifyRouter = async (req, res, next) => {
     const result = await connection.query(sqlUpdateVerify, dataUpdateVerify);
     connection.release();
 
+    const email = `${CLIENT_URL}/login`;
     res
       .status(200)
       .send(
-        '<h1>Verification Success</h1><br><a href="http://localhost:3000/login">Log in here</a>"'
+        `<h1>Verification Success</h1><br><a href=${email}>Log in here</a>`
       );
   } catch (error) {
     next(error);
