@@ -13,6 +13,7 @@ const {
 const postUserRouter = async (req, res, next) => {
   try {
     const sql = "INSERT INTO users SET ?";
+    console.log(req.body);
     const data = req.body;
 
     const isEmail = validator.isEmail(data.email);

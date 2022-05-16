@@ -24,11 +24,11 @@ const getCartRouter = async (req, res, next) => {
 
     const dataSend = results.map((result) => {
       let price;
-      if (result.variant == "box") {
+      if (result.variant === "box") {
         price = result.priceBox;
-      } else if (result.variant == "strip" || result.variant == "bottle") {
+      } else if (result.variant === "strip" || result.variant === "bottle") {
         price = result.priceStrip;
-      } else if (result.variant == "pcs") {
+      } else if (result.variant === "pcs") {
         price = result.pricePcs;
       }
       return {
@@ -97,11 +97,11 @@ const getCustomCartDetailRouter = async (req, res, next) => {
 
     const dataSend = results.map((result) => {
       let price;
-      if (result.variant == "box") {
+      if (result.variant === "box") {
         price = result.priceBox;
-      } else if (result.variant == "strip" || result.variant == "bottle") {
+      } else if (result.variant === "strip" || result.variant === "bottle") {
         price = result.priceStrip;
-      } else if (result.variant == "pcs") {
+      } else if (result.variant === "pcs") {
         price = result.pricePcs;
       }
       return {
