@@ -175,6 +175,30 @@ const getAllProductAdminRouter = router.get(
   }
 );
 
+const getMostWantedProductsRouter = router.get(
+  "/wanted",
+  async (req, res, next) => {
+    try {
+      const connection = await pool.promise().getConnection();
+
+      const sqlGetSimilarProducts = `SELECT p.id, p.productName, p.priceStrip, p.productPhoto, p.dose, c.name, sum(dt.qty) as totalSold from detailTransaction dt 
+      inner join transactions t on t.id = dt.transaction_id
+      inner join products p on p.id = dt.product_id
+      inner join products_categories pc on pc.product_id = p.id
+      inner join categories c on pc.category_id = c.id
+      where t.status = "complete" AND p.isDeleted = 0
+      group by p.productName
+      order by totalSold desc limit 5;`;
+
+      const [bestSeller] = await connection.query(sqlGetSimilarProducts);
+      connection.release();
+      res.status(200).send({ bestSeller });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 module.exports = {
   getAllProductRouter,
   getProductsByCategoryRouter,
@@ -182,4 +206,5 @@ module.exports = {
   getCategoriesRouter,
   getProductsByIdRouter,
   getAllProductAdminRouter,
+  getMostWantedProductsRouter,
 };
