@@ -4,6 +4,7 @@ const router = express.Router();
 const pool = require("../../config/database");
 const { uploadImageAvatar } = require("../../services/multer");
 const multerUploadSingle = uploadImageAvatar.single("userPhoto");
+const connection = await pool.promise().getConnection();
 
 const putProfilePhoto = router.put(
   "/details/:id",
@@ -11,8 +12,6 @@ const putProfilePhoto = router.put(
   async (req, res, next) => {
     console.log(req.file);
     try {
-      const connection = await pool.promise().getConnection();
-
       console.log(req.body);
       let finalImageURL =
         req.protocol + "://" + req.get("host") + "/avatar/" + req.file.filename;
@@ -26,6 +25,7 @@ const putProfilePhoto = router.put(
       connection.release();
       res.status(200).send({ Message: "User photo uploaded" });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }

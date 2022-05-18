@@ -8,6 +8,7 @@ const {
   sendVerificationEmail,
   sendResetPasswordEmail,
 } = require("../../services/emails");
+const connection = await pool.promise().getConnection();
 
 // user register
 const postUserRouter = async (req, res, next) => {
@@ -23,7 +24,6 @@ const postUserRouter = async (req, res, next) => {
     data.password = bcrypt.hashSync(data.password);
 
     // bikin koneksi
-    const connection = await pool.promise().getConnection();
     // simpan data baru, akan me return id nya
     const [result] = await connection.query(sql, data);
     // membuat token yang menyimpan sebuah object
@@ -52,7 +52,6 @@ const postUserRouter = async (req, res, next) => {
 // user login
 const postLoginUser = async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     await connection.beginTransaction();
     const { username, password } = req.body;
 
@@ -81,6 +80,7 @@ const postLoginUser = async (req, res, next) => {
       res.status(200).send({ user: user[0], token });
     }
   } catch (error) {
+    connection.release();
     next(error);
   }
 };
@@ -88,7 +88,6 @@ const postLoginUser = async (req, res, next) => {
 // forgot password
 const postForgotPassword = async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     const sql = `SELECT id FROM users WHERE email = ?;`;
     const sqlEmail = req.body.email;
 
@@ -109,6 +108,7 @@ const postForgotPassword = async (req, res, next) => {
       },
     });
   } catch (error) {
+    connection.release();
     next(error);
   }
 };

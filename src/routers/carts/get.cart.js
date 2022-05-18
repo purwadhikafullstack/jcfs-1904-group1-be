@@ -1,9 +1,9 @@
 const pool = require("../../config/database");
 const router = require("express").Router();
+const connection = await pool.promise().getConnection();
 
 const getCartRouter = async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     const sqlGetProducts = `select c.id, c.user_id, c.product_id, c.qty, p.productName, p.productPhoto, p.priceStrip, p.priceBox, p.pricePcs, c.variant from carts c
     inner join products p on p.id = c.product_id
     where c.user_id = ? && c.status = "cart";`;
@@ -48,13 +48,13 @@ const getCartRouter = async (req, res, next) => {
 
     res.status(200).send({ dataSend, total, totalAfterTax, ppnObat, tax });
   } catch (error) {
+    connection.release();
     next(error);
   }
 };
 
 const getCustomCartRouter = async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     const sqlGetProducts = `SELECT u.id, u.username, t.id as transactionId, c.status, t.invoice, t.prescriptionPhoto
     FROM carts c
     INNER JOIN users u ON c.user_id = u.id
@@ -67,13 +67,13 @@ const getCustomCartRouter = async (req, res, next) => {
 
     res.status(200).send({ result });
   } catch (error) {
+    connection.release();
     next(error);
   }
 };
 
 const getCustomCartDetailRouter = async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     const sqlGetProducts = `select c.id, c.user_id, c.product_id, c.qty, p.productName, p.productPhoto, p.priceStrip, p.priceBox, p.pricePcs, c.variant, t.invoice, t.prescriptionPhoto from carts c
     inner join products p on p.id = c.product_id
     inner join users u on u.id = c.user_id
@@ -119,6 +119,7 @@ const getCustomCartDetailRouter = async (req, res, next) => {
 
     res.status(200).send({ dataSend, total, totalAfterTax, ppnObat, tax });
   } catch (error) {
+    connection.release();
     next(error);
   }
 };

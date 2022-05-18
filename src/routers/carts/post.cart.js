@@ -1,11 +1,11 @@
 const { query } = require("../../config/database");
 const pool = require("../../config/database");
 const router = require("express").Router();
+const connection = await pool.promise().getConnection();
 
 const postCartRouter = async (req, res, next) => {
   const { user_id, product_id, qty } = req.body;
   try {
-    const connection = await pool.promise().getConnection();
     await connection.beginTransaction();
 
     try {
@@ -49,7 +49,6 @@ const postCheckoutRouter = async (req, res, next) => {
   // const { invoice, user_id, status, amount } = req.body;
   const data = req.body.carts[0];
   try {
-    const connection = await pool.promise().getConnection();
     await connection.beginTransaction();
 
     try {
@@ -157,8 +156,6 @@ const postCheckoutRouter = async (req, res, next) => {
 
 const postCartCustomRouter = async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
-
     const sqlDetails = `insert into carts(user_id, product_id, qty, status, variant) values ?;`;
     const sqlDetailsData = req.body.selected.map((product) => {
       if (product.isLiquid === 1) {
@@ -172,6 +169,7 @@ const postCartCustomRouter = async (req, res, next) => {
     connection.release();
     res.status(200).send([result]);
   } catch (error) {
+    connection.release();
     next(error);
   }
 };
