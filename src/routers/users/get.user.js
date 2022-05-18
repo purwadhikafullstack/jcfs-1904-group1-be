@@ -2,9 +2,9 @@ const router = require("express").Router();
 const pool = require("../../config/database");
 const { verify } = require("../../services/token");
 const { CLIENT_URL } = process.env;
-const connection = await pool.promise().getConnection();
 
 const getUserRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetAllUser =
       "select id, username, email, fullName, age, gender from users;";
@@ -20,6 +20,7 @@ const getUserRouter = async (req, res, next) => {
 };
 
 const getVerifyRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const verifiedToken = verify(req.query.token);
     const sqlUpdateVerify = "update users set isVerified = true where id = ?";
@@ -41,6 +42,7 @@ const getVerifyRouter = async (req, res, next) => {
 };
 
 const getUserByIdRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetUserById =
       "select id, username, email, password, fullName, userPhoto, age, gender, address from users where id = ?";
@@ -54,6 +56,7 @@ const getUserByIdRouter = async (req, res, next) => {
 };
 
 const getUserCountRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlCountUser = `select count(id) as total from users
     where isAdmin = 0 and isVerified = 1;`;

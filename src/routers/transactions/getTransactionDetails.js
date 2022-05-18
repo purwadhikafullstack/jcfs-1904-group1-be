@@ -1,11 +1,11 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
-const connection = await pool.promise().getConnection();
 
 const getTransactionDetails = router.get(
   "/details/:transactionId",
   async (req, res, next) => {
     // const { invoice, user_id, status, amount } = req.body;
+    const connection = await pool.promise().getConnection();
     try {
       const sqlDetails = `select amount, invoice, transaction_id, product_id, t.prescriptionPhoto, productName, productPrice, productPhoto, qty, variant, d.createdAt, d.updatedAt, user_id, status, paymentPhoto, isByPrescription  from detailTransaction d 
       inner join transactions t on t.id = d.transaction_id
@@ -27,6 +27,7 @@ const getCustomOrderRouter = router.get(
   "/details/custom/:transactionId",
   async (req, res, next) => {
     // const { invoice, user_id, status, amount } = req.body;
+    const connection = await pool.promise().getConnection();
     try {
       const sqlDetails = `SELECT *
       FROM transactions t

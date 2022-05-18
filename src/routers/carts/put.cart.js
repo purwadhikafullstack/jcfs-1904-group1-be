@@ -1,9 +1,9 @@
 const pool = require("../../config/database");
 const router = require("express").Router();
-const connection = await pool.promise().getConnection();
 
 const increaseQtyRouter = async (req, res, next) => {
   const { user_id, product_id, qty, status } = req.body;
+  const connection = await pool.promise().getConnection();
   try {
     const sqlCheckCart = `select qty from carts where user_id = ? and product_id = ? and status = ? and variant = ?;`;
     const dataCheck = [
@@ -40,6 +40,7 @@ const increaseQtyRouter = async (req, res, next) => {
 const decreaseQtyRouter = async (req, res, next) => {
   const { user_id, product_id, qty, status } = req.body;
   console.log(req.body);
+  const connection = await pool.promise().getConnection();
   try {
     const sqlCheckCart = `select qty from carts where user_id = ? and product_id = ? and status = ? and variant = ?;`;
     const dataCheck = [

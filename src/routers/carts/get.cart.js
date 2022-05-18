@@ -1,8 +1,8 @@
 const pool = require("../../config/database");
 const router = require("express").Router();
-const connection = await pool.promise().getConnection();
 
 const getCartRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetProducts = `select c.id, c.user_id, c.product_id, c.qty, p.productName, p.productPhoto, p.priceStrip, p.priceBox, p.pricePcs, c.variant from carts c
     inner join products p on p.id = c.product_id
@@ -54,6 +54,7 @@ const getCartRouter = async (req, res, next) => {
 };
 
 const getCustomCartRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetProducts = `SELECT u.id, u.username, t.id as transactionId, c.status, t.invoice, t.prescriptionPhoto
     FROM carts c
@@ -73,6 +74,7 @@ const getCustomCartRouter = async (req, res, next) => {
 };
 
 const getCustomCartDetailRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetProducts = `select c.id, c.user_id, c.product_id, c.qty, p.productName, p.productPhoto, p.priceStrip, p.priceBox, p.pricePcs, c.variant, t.invoice, t.prescriptionPhoto from carts c
     inner join products p on p.id = c.product_id

@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 const moment = require("moment");
-const connection = await pool.promise().getConnection();
 
 const getUserTransactionsRouter = router.get("/:id", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlUserTransactions = `select * from transactions where user_id = ? and status = ?;`;
     const sqlUser = [req.params.id, req.query.status];

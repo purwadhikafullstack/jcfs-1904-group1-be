@@ -1,11 +1,11 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 const moment = require("moment");
-const connection = await pool.promise().getConnection();
 
 // REVENUE REPORT //
 
 const getSalesReportRouter = router.get("/revenue", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     let sqlSalesReport = `SELECT t.id, t.invoice, u.username, t.amount, t.createdAt AS date FROM transactions t
     INNER JOIN users u ON t.user_id = u.id`;
@@ -72,6 +72,7 @@ const getSalesReportRouter = router.get("/revenue", async (req, res, next) => {
 const getProductsReportRouter = router.get(
   `/products-report`,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       let sqlGetProductsReport = `SELECT dt.id, t.invoice, u.username, p.productName, dt.qty, dt.variant, DATE_FORMAT(dt.createdAt, "%Y-%m") AS date
       FROM detailtransaction dt
@@ -191,6 +192,7 @@ const getProductsReportRouter = router.get(
 const getAllTimeRevenueRouter = router.get(
   `/all-revenue`,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const sql = `SELECT sum(amount) as revenue FROM transactions where status = "complete";`;
 

@@ -1,10 +1,10 @@
 const { query } = require("../../config/database");
 const pool = require("../../config/database");
 const router = require("express").Router();
-const connection = await pool.promise().getConnection();
 
 const postCartRouter = async (req, res, next) => {
   const { user_id, product_id, qty } = req.body;
+  const connection = await pool.promise().getConnection();
   try {
     await connection.beginTransaction();
 
@@ -48,6 +48,7 @@ const postCartRouter = async (req, res, next) => {
 const postCheckoutRouter = async (req, res, next) => {
   // const { invoice, user_id, status, amount } = req.body;
   const data = req.body.carts[0];
+  const connection = await pool.promise().getConnection();
   try {
     await connection.beginTransaction();
 
@@ -155,6 +156,7 @@ const postCheckoutRouter = async (req, res, next) => {
 };
 
 const postCartCustomRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlDetails = `insert into carts(user_id, product_id, qty, status, variant) values ?;`;
     const sqlDetailsData = req.body.selected.map((product) => {

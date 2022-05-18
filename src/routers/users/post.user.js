@@ -8,10 +8,10 @@ const {
   sendVerificationEmail,
   sendResetPasswordEmail,
 } = require("../../services/emails");
-const connection = await pool.promise().getConnection();
 
 // user register
 const postUserRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sql = "INSERT INTO users SET ?";
     console.log(req.body);
@@ -51,6 +51,7 @@ const postUserRouter = async (req, res, next) => {
 
 // user login
 const postLoginUser = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     await connection.beginTransaction();
     const { username, password } = req.body;
@@ -87,6 +88,7 @@ const postLoginUser = async (req, res, next) => {
 
 // forgot password
 const postForgotPassword = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sql = `SELECT id FROM users WHERE email = ?;`;
     const sqlEmail = req.body.email;

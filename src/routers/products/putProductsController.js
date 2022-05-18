@@ -4,12 +4,12 @@ const pool = require("../../config/database");
 const { uploadImage } = require("../../services/multer");
 
 const multerUploadSingle = uploadImage.single("productPhoto");
-const connection = await pool.promise().getConnection();
 
 const putProductsRouter = router.put(
   `/:id`,
   multerUploadSingle,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       await connection.beginTransaction();
       try {
@@ -249,6 +249,7 @@ const putProductsRouter = router.put(
 );
 
 const putDeleteRouter = router.put(`/:id/delete`, async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sql = `UPDATE products SET isDeleted = 1 WHERE id = ${req.params.id} `;
     const result = await connection.query(sql);
@@ -262,6 +263,7 @@ const putDeleteRouter = router.put(`/:id/delete`, async (req, res, next) => {
 const putUnDeleteRouter = router.put(
   `/:id/undelete`,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const sql = `UPDATE products SET isDeleted = 0 WHERE id = ${req.params.id} `;
       const result = await connection.query(sql);

@@ -4,9 +4,9 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const { verify, sign } = require("../../services/token");
 const { sendVerificationEmail } = require("../../services/emails");
-const connection = await pool.promise().getConnection();
 
 const putUserRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     console.log(req.body);
     const sqlUpdateUser = `UPDATE users SET ? WHERE id = ${req.params.userId};`;
@@ -24,6 +24,7 @@ const putUserRouter = async (req, res, next) => {
 };
 
 const putResetPasswordRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sql = "UPDATE users SET password = ? WHERE id = ?;";
     const verifiedToken = verify(req.params.token);
