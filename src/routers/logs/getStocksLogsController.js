@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 const moment = require("moment");
-const connection = await pool.promise().getConnection();
 
 // Get Stocks Logs
 const getLogsRouter = router.get("/", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     let sqlGetLogs = `SELECT l.id, p.productName, u.username, l.description, l.type, l.amount, l.current_stock, l.createdAt AS date FROM logs l
     INNER JOIN products p ON l.product_id = p.id
