@@ -11,8 +11,10 @@ const {
 
 // user register
 const postUserRouter = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sql = "INSERT INTO users SET ?";
+    console.log(req.body);
     const data = req.body;
 
     const isEmail = validator.isEmail(data.email);
@@ -22,7 +24,6 @@ const postUserRouter = async (req, res, next) => {
     data.password = bcrypt.hashSync(data.password);
 
     // bikin koneksi
-    const connection = await pool.promise().getConnection();
     // simpan data baru, akan me return id nya
     const [result] = await connection.query(sql, data);
     // membuat token yang menyimpan sebuah object
@@ -50,8 +51,8 @@ const postUserRouter = async (req, res, next) => {
 
 // user login
 const postLoginUser = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
-    const connection = await pool.promise().getConnection();
     await connection.beginTransaction();
     const { username, password } = req.body;
 
@@ -65,26 +66,30 @@ const postLoginUser = async (req, res, next) => {
     const user = result[0];
 
     const compareResult = bcrypt.compareSync(password, user[0].password);
+
     if (!compareResult) {
       return res.status(401).send({ message: "Log in cridentials invalid" });
     }
+
     const token = sign(user[0].id);
 
-    res.status(200).send({ user: user[0], token });
-    // if (user.isVerified === 1) {
-    //   return res.status(200).send({ user });
-    // } else {
-    //   return res.status(401).send({ message: "Please verify your account" });
-    // }
+    if (user[0].isVerified == 0) {
+      return res
+        .status(401)
+        .send({ message: "Please verify your account before logging in" });
+    } else if (user[0].isVerified == 1) {
+      res.status(200).send({ user: user[0], token });
+    }
   } catch (error) {
+    connection.release();
     next(error);
   }
 };
 
 // forgot password
 const postForgotPassword = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
-    const connection = await pool.promise().getConnection();
     const sql = `SELECT id FROM users WHERE email = ?;`;
     const sqlEmail = req.body.email;
 
@@ -105,6 +110,7 @@ const postForgotPassword = async (req, res, next) => {
       },
     });
   } catch (error) {
+    connection.release();
     next(error);
   }
 };

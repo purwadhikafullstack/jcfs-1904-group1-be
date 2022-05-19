@@ -5,9 +5,8 @@ const moment = require("moment");
 // REVENUE REPORT //
 
 const getSalesReportRouter = router.get("/revenue", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
-    const connection = await pool.promise().getConnection();
-
     let sqlSalesReport = `SELECT t.id, t.invoice, u.username, t.amount, t.createdAt AS date FROM transactions t
     INNER JOIN users u ON t.user_id = u.id`;
 
@@ -63,6 +62,7 @@ const getSalesReportRouter = router.get("/revenue", async (req, res, next) => {
     connection.release();
     res.status(200).send({ data, dataChart, totalCount });
   } catch (error) {
+    connection.release();
     next(error);
   }
 });
@@ -72,8 +72,8 @@ const getSalesReportRouter = router.get("/revenue", async (req, res, next) => {
 const getProductsReportRouter = router.get(
   `/products-report`,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
-      const connection = await pool.promise().getConnection();
       let sqlGetProductsReport = `SELECT dt.id, t.invoice, u.username, p.productName, dt.qty, dt.variant, DATE_FORMAT(dt.createdAt, "%Y-%m") AS date
       FROM detailtransaction dt
       INNER JOIN transactions t ON dt.transaction_id = t.id
@@ -183,6 +183,7 @@ const getProductsReportRouter = router.get(
       connection.release();
       res.status(200).send({ data, totalCount, result, products, monthlyData });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -191,8 +192,8 @@ const getProductsReportRouter = router.get(
 const getAllTimeRevenueRouter = router.get(
   `/all-revenue`,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
-      const connection = await pool.promise().getConnection();
       const sql = `SELECT sum(amount) as revenue FROM transactions where status = "complete";`;
 
       const sqlSold = `SELECT sum(qty) as totalSold from detailTransaction dt 
@@ -204,6 +205,7 @@ const getAllTimeRevenueRouter = router.get(
       connection.release();
       res.status(200).send({ results, sold });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }

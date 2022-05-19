@@ -5,24 +5,23 @@ const pool = require("../../config/database");
 const getCategoriesRouter = router.get(
   "/categories",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
-      const connection = await pool.promise().getConnection();
-
       const sqlGetCategories = "SELECT name, id FROM categories";
       const result = await connection.query(sqlGetCategories);
       connection.release();
 
       res.status(200).send(result);
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
 );
 //Get Products
 const getAllProductRouter = router.get("/", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
-    const connection = await pool.promise().getConnection();
-
     let sqlGetProducts = `SELECT *, p.id FROM products p
     INNER JOIN products_categories pc ON p.id = pc.product_id
     INNER JOIN categories c ON pc.category_id = c.id
@@ -43,6 +42,7 @@ const getAllProductRouter = router.get("/", async (req, res, next) => {
     connection.release();
     res.status(200).send({ result, total: resultTotal[0].total });
   } catch (error) {
+    connection.release();
     next(error);
   }
 });
@@ -51,8 +51,8 @@ const getAllProductRouter = router.get("/", async (req, res, next) => {
 const getProductsByCategoryRouter = router.get(
   "/category/:category",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
-      const connection = await pool.promise().getConnection();
       let sqlGetProductsByCategory = `SELECT products.id, products.productName, categories.name AS category, products.priceStrip, products.productPhoto, products.dose, name, stocks.isLiquid
       FROM (((products_categories
       INNER JOIN products ON products_categories.product_id = products.id)
@@ -89,6 +89,7 @@ const getProductsByCategoryRouter = router.get(
       connection.release();
       res.status(200).send({ result, total: resultTotal[0].total });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -98,9 +99,8 @@ const getProductsByCategoryRouter = router.get(
 const getProductsByIdRouter = router.get(
   "/:category/:id",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
-      const connection = await pool.promise().getConnection();
-
       const sqlGetProductsByCategory = `SELECT *, products.id FROM (((products
       INNER JOIN products_categories ON products_categories.product_id = products.id)
       INNER JOIN categories ON products_categories.category_id  = categories.id)
@@ -125,6 +125,7 @@ const getProductsByIdRouter = router.get(
       connection.release();
       res.status(200).send({ result, resultSimilar });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -134,8 +135,8 @@ const getProductsByIdRouter = router.get(
 const getProductsByNameRouter = router.get(
   "/search",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
-      const connection = await pool.promise().getConnection();
       const data = req.query.search;
       const sqlGetProductsByName = `SELECT * FROM products WHERE productName LIKE ? AND isDeleted = 0;`;
       const dataGetProducts = "%" + data + "%";
@@ -146,6 +147,7 @@ const getProductsByNameRouter = router.get(
       connection.release();
       res.status(200).send(result);
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -154,9 +156,8 @@ const getProductsByNameRouter = router.get(
 const getAllProductAdminRouter = router.get(
   "/admin",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
-      const connection = await pool.promise().getConnection();
-
       let sqlGetProducts = `SELECT *, p.id FROM products p
     INNER JOIN products_categories pc ON p.id = pc.product_id
     INNER JOIN categories c ON pc.category_id = c.id
@@ -170,6 +171,31 @@ const getAllProductAdminRouter = router.get(
       connection.release();
       res.status(200).send({ result, total: resultTotal[0].total });
     } catch (error) {
+      connection.release();
+      next(error);
+    }
+  }
+);
+
+const getMostWantedProductsRouter = router.get(
+  "/wanted",
+  async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
+    try {
+      const sqlGetSimilarProducts = `SELECT p.id, p.productName, p.priceStrip, p.productPhoto, p.dose, c.name, sum(dt.qty) as totalSold from detailTransaction dt 
+      inner join transactions t on t.id = dt.transaction_id
+      inner join products p on p.id = dt.product_id
+      inner join products_categories pc on pc.product_id = p.id
+      inner join categories c on pc.category_id = c.id
+      where t.status = "complete" AND p.isDeleted = 0
+      group by p.productName
+      order by totalSold desc limit 5;`;
+
+      const [bestSeller] = await connection.query(sqlGetSimilarProducts);
+      connection.release();
+      res.status(200).send({ bestSeller });
+    } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -182,4 +208,5 @@ module.exports = {
   getCategoriesRouter,
   getProductsByIdRouter,
   getAllProductAdminRouter,
+  getMostWantedProductsRouter,
 };
