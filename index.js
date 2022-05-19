@@ -43,5 +43,5 @@ app.use((error, req, res, next) => {
 
 app.listen(port, (err) => {
   if (err) return cosole.log({ err });
-  console.log(`API 1-Pharmacy : ${port} 🚀`);
+  console.log(`API 1-Pharmacy on port ${port}`);
 });
