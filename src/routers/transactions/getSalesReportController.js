@@ -42,6 +42,7 @@ const getSalesReportRouter = router.get("/revenue", async (req, res, next) => {
     } else {
       sqlSalesReport += ` WHERE t.status = "complete" ORDER BY date ASC
       LIMIT ${req.query.limit} OFFSET ${req.query.offSet};`;
+      sqlGetReportCount += ` WHERE t.status = "complete";`;
     }
     const [results] = await connection.query(sqlSalesReport);
     const [revByMonth] = await connection.query(sqlGetRevenue);
