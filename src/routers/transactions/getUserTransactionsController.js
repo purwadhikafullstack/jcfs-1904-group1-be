@@ -3,9 +3,8 @@ const pool = require("../../config/database");
 const moment = require("moment");
 
 const getUserTransactionsRouter = router.get("/:id", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
-    const connection = await pool.promise().getConnection();
-
     const sqlUserTransactions = `select * from transactions where user_id = ? and status = ? limit ${req.query.limit} offset ${req.query.offset};`;
     const sqlUser = [req.params.id, req.query.status];
 
@@ -26,6 +25,7 @@ const getUserTransactionsRouter = router.get("/:id", async (req, res, next) => {
 
     res.status(200).send({ dataDate, total: resultCount[0].total });
   } catch (error) {
+    connection.release();
     next(error);
   }
 });
@@ -37,9 +37,9 @@ const getUserTransactionsByName = router.get(
       const connection = await pool.promise().getConnection();
       const data = req.query.search;
 
-      const sqlGetTransactionsByName = `SELECT * FROM transactions WHERE invoice LIKE ? AND status = ?;`;
+      const sqlGetTransactionsByName = `SELECT * FROM transactions WHERE invoice LIKE ? AND status = ? AND user_id = ?;`;
       const dataGetTransactions = "%" + data + "%";
-      const dataSql = [dataGetTransactions, req.query.status];
+      const dataSql = [dataGetTransactions, req.query.status, req.params.id];
       const [result] = await connection.query(
         sqlGetTransactionsByName,
         dataSql

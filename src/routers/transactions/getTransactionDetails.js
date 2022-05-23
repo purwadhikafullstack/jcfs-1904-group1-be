@@ -5,10 +5,9 @@ const getTransactionDetails = router.get(
   "/details/:transactionId",
   async (req, res, next) => {
     // const { invoice, user_id, status, amount } = req.body;
+    const connection = await pool.promise().getConnection();
     try {
-      const connection = await pool.promise().getConnection();
-
-      const sqlDetails = `select amount, invoice, transaction_id, product_id, t.prescriptionPhoto, productName, productPrice, productPhoto, qty, variant, d.createdAt, d.updatedAt, user_id, status, paymentPhoto, isByPrescription, address  from detailTransaction d 
+      const sqlDetails = `select amount, address, invoice, transaction_id, product_id, t.prescriptionPhoto, productName, productPrice, productPhoto, qty, variant, d.createdAt, d.updatedAt, user_id, status, paymentPhoto, isByPrescription  from detailTransaction d 
       inner join transactions t on t.id = d.transaction_id
         where transaction_id = ?;`;
       const sqlData = req.params.transactionId;
@@ -18,6 +17,7 @@ const getTransactionDetails = router.get(
 
       res.status(200).send(result);
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -27,9 +27,8 @@ const getCustomOrderRouter = router.get(
   "/details/custom/:transactionId",
   async (req, res, next) => {
     // const { invoice, user_id, status, amount } = req.body;
+    const connection = await pool.promise().getConnection();
     try {
-      const connection = await pool.promise().getConnection();
-
       const sqlDetails = `SELECT *
       FROM transactions t
       WHERE t.id = ?;`;
@@ -49,6 +48,7 @@ const getCustomOrderRouter = router.get(
 
       res.status(200).send({ order, products });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }

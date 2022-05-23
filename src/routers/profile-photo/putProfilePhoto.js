@@ -10,9 +10,8 @@ const putProfilePhoto = router.put(
   multerUploadSingle,
   async (req, res, next) => {
     console.log(req.file);
+    const connection = await pool.promise().getConnection();
     try {
-      const connection = await pool.promise().getConnection();
-
       console.log(req.body);
       let finalImageURL =
         req.protocol + "://" + req.get("host") + "/avatar/" + req.file.filename;
@@ -26,6 +25,7 @@ const putProfilePhoto = router.put(
       connection.release();
       res.status(200).send({ Message: "User photo uploaded" });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }

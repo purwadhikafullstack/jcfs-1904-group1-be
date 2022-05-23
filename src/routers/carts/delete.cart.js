@@ -2,9 +2,9 @@ const pool = require("../../config/database");
 const router = require("express").Router();
 
 const deleteCartRouter = async (req, res, next) => {
-  try {
-    const connection = await pool.promise().getConnection();
+  const connection = await pool.promise().getConnection();
 
+  try {
     const sqlDeleteCart = `delete carts where user_id = ?;`;
     const data = req.params.id;
     const result = await connection.query(sqlDeleteCart, data);
@@ -13,6 +13,7 @@ const deleteCartRouter = async (req, res, next) => {
 
     res.status(200).send({ result });
   } catch (error) {
+    connection.release();
     next(error);
   }
 };

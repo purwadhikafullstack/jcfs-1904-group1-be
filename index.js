@@ -32,7 +32,7 @@ app.use("/uploads", profilePhotoRouter);
 app.use("/rajaongkir", rajaOngkirRouter);
 
 app.get("/", (req, res) => {
-  res.status(200).send("API 1-Pharmacy");
+  res.status(200).send("API 1-Pharmacy 😎");
 });
 
 app.use((error, req, res, next) => {
@@ -45,5 +45,5 @@ app.use((error, req, res, next) => {
 
 app.listen(port, (err) => {
   if (err) return cosole.log({ err });
-  console.log(`Api is running at port ${port}`);
+  console.log(`API 1-Pharmacy on port ${port}`);
 });

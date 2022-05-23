@@ -1,13 +1,10 @@
 const pool = require("../../config/database");
 const router = require("express").Router();
 
-
-
 const increaseQtyRouter = async (req, res, next) => {
   const { user_id, product_id, qty, status } = req.body;
+  const connection = await pool.promise().getConnection();
   try {
-    const connection = await pool.promise().getConnection();
-
     const sqlCheckCart = `select qty from carts where user_id = ? and product_id = ? and status = ? and variant = ?;`;
     const dataCheck = [
       req.body.user_id,
@@ -32,6 +29,7 @@ const increaseQtyRouter = async (req, res, next) => {
       connection.release();
       res.status(200).send("Qty increased");
     } catch (error) {
+      connection.release();
       next(error);
     }
   } catch (error) {
@@ -42,9 +40,8 @@ const increaseQtyRouter = async (req, res, next) => {
 const decreaseQtyRouter = async (req, res, next) => {
   const { user_id, product_id, qty, status } = req.body;
   console.log(req.body);
+  const connection = await pool.promise().getConnection();
   try {
-    const connection = await pool.promise().getConnection();
-
     const sqlCheckCart = `select qty from carts where user_id = ? and product_id = ? and status = ? and variant = ?;`;
     const dataCheck = [
       req.body.user_id,
@@ -69,6 +66,7 @@ const decreaseQtyRouter = async (req, res, next) => {
       connection.release();
       res.status(200).send("Qty decreased");
     } catch (error) {
+      connection.release();
       next(error);
     }
   } catch (error) {
