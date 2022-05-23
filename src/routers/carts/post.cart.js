@@ -59,6 +59,7 @@ const postCheckoutRouter = async (req, res, next) => {
         user_id: req.body.user_id,
         // status: req.body.status,
         amount: req.body.amount,
+        address: req.body.address,
       };
       // const sqlCheckoutData = req.body;
 
