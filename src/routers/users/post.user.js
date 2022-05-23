@@ -61,7 +61,6 @@ const postLoginUser = async (req, res, next) => {
     const sqlDataUSer = username;
 
     const result = await connection.query(sqlLoginUser, sqlDataUSer);
-    connection.release();
 
     const user = result[0];
 
@@ -71,7 +70,7 @@ const postLoginUser = async (req, res, next) => {
       return res.status(401).send({ message: "Log in cridentials invalid" });
     }
 
-    const token = sign(user[0].id);
+    const token = sign({ id: user[0].id });
 
     if (user[0].isVerified == 0) {
       return res
@@ -79,6 +78,8 @@ const postLoginUser = async (req, res, next) => {
         .send({ message: "Please verify your account before logging in" });
     } else if (user[0].isVerified == 1) {
       res.status(200).send({ user: user[0], token });
+      connection.commit();
+      connection.release();
     }
   } catch (error) {
     next(error);
