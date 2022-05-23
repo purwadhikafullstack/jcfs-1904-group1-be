@@ -108,6 +108,28 @@ const putOrderRouter = async (req, res, next) => {
           })
         );
         await connection.query(sqlInsertLog, [dataLog]);
+      } else if (req.body.status === "reject") {
+        let sqlUpdateQtyAvailable = "";
+        let dataBox = [];
+        req.body.transaction.forEach(async (product) => {
+          if (product.variant === "box") {
+            sqlUpdateQtyAvailable = `update stocks set qtyBoxAvailable = qtyBoxAvailable + ? where product_id = ?`;
+            dataBox = [product.qty, product.product_id];
+            await connection.query(sqlUpdateQtyAvailable, dataBox);
+          } else if (product.variant === "strip") {
+            sqlUpdateQtyAvailable = `update stocks set qtyStripAvailable = qtyStripAvailable + ? where product_id = ?`;
+            dataBox = [product.qty, product.product_id];
+            await connection.query(sqlUpdateQtyAvailable, dataBox);
+          } else if (product.variant === "bottle") {
+            sqlUpdateQtyAvailable = `update stocks set qtyStripAvailable = qtyStripAvailable + ? where product_id = ?`;
+            dataBox = [product.qty, product.product_id];
+            await connection.query(sqlUpdateQtyAvailable, dataBox);
+          } else if (product.variant === "pcs") {
+            sqlUpdateQtyAvailable = `update stocks set qtyPcsAvailable = qtyPcsAvailable + ? where product_id = ?`;
+            dataBox = [product.qty, product.product_id];
+            await connection.query(sqlUpdateQtyAvailable, dataBox);
+          }
+        });
       }
       connection.commit();
 
