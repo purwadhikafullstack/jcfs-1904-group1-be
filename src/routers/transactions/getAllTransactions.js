@@ -5,8 +5,11 @@ const moment = require("moment");
 const getAllTransactions = router.get("/", async (req, res, next) => {
   const connection = await pool.promise().getConnection();
   try {
-    const sqlTransactions = `select * from transactions where status = ?;`;
+    const sqlTransactions = `SELECT *, t.id FROM transactions t inner join users u where u.id = t.user_id and status = ? limit ${req.query.limit} offset ${req.query.offset};`;
     const sqlUser = req.query.status;
+
+    const sqlCountTransactions = `select count(id) as total from transactions where status = ?`;
+    const sqlData = req.query.status;
 
     const result = await connection.query(sqlTransactions, sqlUser);
     const dataDate = result[0].map((result) => {
@@ -16,9 +19,11 @@ const getAllTransactions = router.get("/", async (req, res, next) => {
       };
     });
 
+    const [resultCount] = await connection.query(sqlCountTransactions, sqlData);
+
     connection.release();
 
-    res.status(200).send({ dataDate });
+    res.status(200).send({ dataDate, total: resultCount[0].total });
   } catch (error) {
     connection.release();
     next(error);

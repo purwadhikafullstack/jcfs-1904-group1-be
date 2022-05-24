@@ -75,7 +75,7 @@ const getProductsReportRouter = router.get(
   async (req, res, next) => {
     const connection = await pool.promise().getConnection();
     try {
-      let sqlGetProductsReport = `SELECT dt.id, t.invoice, u.username, p.productName, dt.qty, dt.variant, DATE_FORMAT(dt.createdAt, "%Y-%m") AS date
+      let sqlGetProductsReport = `SELECT dt.id, t.invoice, u.username, p.productName, dt.qty, dt.variant, dt.createdAt AS date
       FROM detailtransaction dt
       INNER JOIN transactions t ON dt.transaction_id = t.id
       INNER JOIN users u ON t.user_id = u.id
@@ -153,14 +153,14 @@ const getProductsReportRouter = router.get(
         sqlGetProductsSalesByMonth += ` AND DATE_FORMAT(dt.createdAt, "%Y-%m") >= '${dataInitSql}' AND DATE_FORMAT(dt.createdAt, "%Y-%m") <= "${dataFinalSql}"`;
       }
 
-      sqlGetProductsReport += ` ORDER BY date ASC
+      sqlGetProductsReport += ` ORDER BY date DESC
         LIMIT ${req.query.limit} OFFSET ${req.query.offSet};`;
 
       sqlGetProductByCategory += ` GROUP BY c.name
-      ORDER BY c.name ASC;`;
+      ORDER BY c.name DESC;`;
 
       sqlGetProductsSalesByMonth += ` GROUP BY date, variant, p.productName
-      ORDER BY date ASC;`;
+      ORDER BY date DESC;`;
 
       const [products] = await connection.query(sqlGetProducts);
       const [result] = await connection.query(sqlGetProductByCategory);
