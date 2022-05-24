@@ -34,6 +34,7 @@ const putResetPasswordRouter = async (req, res, next) => {
     const sqlNewNewPassword = [sqlNewPassword, verifiedToken.id];
 
     const result = await connection.query(sql, sqlNewNewPassword);
+    console.log(verifiedToken);
     connection.release();
 
     res.status(200).send("Password has been reset");

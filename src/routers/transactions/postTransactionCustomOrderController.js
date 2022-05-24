@@ -15,12 +15,8 @@ const postCheckoutRouter = router.post(
       await connection.beginTransaction();
 
       try {
-        const sqlCheckout = `update transactions set ? WHERE id = ${req.params.transactionId} AND status = "custom";`;
-        const sqlCheckoutData = {
-          status: req.body.status,
-          amount: req.body.amount,
-        };
-
+        const sqlCheckout = `update transactions set status = ?, amount = amount + ? WHERE id = ${req.params.transactionId} AND status = "custom";`;
+        const sqlCheckoutData = [req.body.status, req.body.amount];
         const [result] = await connection.query(sqlCheckout, sqlCheckoutData);
 
         const sqlInputDetails = `insert into detailTransaction (transaction_id, product_id, productName, productPrice, productPhoto, qty, variant) values ?;`;
@@ -100,11 +96,12 @@ const postNewCustom = router.post(
       const sqlCheckout = `insert into transactions set ?;`;
       const sqlCheckoutData = {
         invoice: req.body.invoice,
+        amount: req.body.amount,
+        address: req.body.address,
         user_id: req.body.user_id,
         status: "custom",
         isByPrescription: 1,
         prescriptionPhoto: finalImageURL,
-        amount: 0,
       };
       const result = await connection.query(sqlCheckout, sqlCheckoutData);
       res.status(200).send("Upload prescription -> admin");
